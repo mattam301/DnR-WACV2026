@@ -4,7 +4,7 @@ import torch.nn.functional as F
 import torch.nn as nn
 from typing import List
 from comm_loss import CoMMLoss 
-from backbone import LateFusion, MMGCN, MultiDialogueGCN, MM_DFN, MultiBiModel
+from backbone import LateFusion, MMGCN, MultiDialogueGCN, MM_DFN
 from mmfusion import MMFusion
 
 class Model(nn.Module):
