@@ -667,7 +667,7 @@ def get_argurment():
         args.input_embedding_dim[dataset] = raw_embedding_dim[base]
         args.embedding_dim[dataset] = (
             refined_embedding_dim
-            if args.use_refine or dataset.endswith("_coid")
+            if args.use_refine
             else raw_embedding_dim[base]
         )
 
@@ -744,7 +744,7 @@ def main(args):
 
     inferred_dims = infer_feature_dims(data)
     args.input_embedding_dim[args.dataset] = inferred_dims
-    if not (args.use_refine or args.dataset.endswith("_coid")):
+    if not args.use_refine:
         args.embedding_dim[args.dataset] = inferred_dims
 
     train_set = Dataloader(data["train"], args)
