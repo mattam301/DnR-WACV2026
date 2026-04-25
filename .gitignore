@@ -133,3 +133,4 @@ dmypy.json
 *.pth
 *.out
 *.pt
+*.pkl

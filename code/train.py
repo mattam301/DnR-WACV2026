@@ -1,5 +1,3 @@
-from comet_ml import Experiment
-from comet_ml.integration.pytorch import log_model
 from tqdm import tqdm
 import copy
 import argparse
@@ -7,6 +5,11 @@ import os
 import time
 from datetime import datetime
 from comm_loss import CoMMLoss 
+
+try:
+    from comet_ml import Experiment
+except ImportError:
+    Experiment = None
 
 # Create a folder for saving plots
 os.makedirs("viz_embeddings", exist_ok=True)
@@ -19,7 +22,7 @@ import torch.nn.functional as F
 from sklearn import metrics
 
 from model import Model
-from dataloader import load_iemocap, load_meld, Dataloader
+from dataloader import base_dataset_name, infer_feature_dims, load_affect_dataset, load_iemocap, load_meld, Dataloader
 from optimizer import Optimizer
 from utils import set_seed, weight_visualize, info_nce_loss, visualize_embeddings, forward_masked_augmented
 import json
@@ -33,7 +36,7 @@ def smurf_pretrain(smurf_model: ThreeModalityModel, train_set: Dataloader, args)
         optim = Optimizer(args.learning_rate, args.weight_decay)
         optim.set_parameters(smurf_model.parameters(), args.optimizer)
         smurf_model.to(device)
-        for epoch in range(200):
+        for epoch in range(args.pretrain_epochs):
             for idx in (pbar := tqdm(range(len(train_set)), desc=f"Epoch {epoch+1}")):
                 smurf_model.zero_grad()
                 data = train_set[idx]
@@ -166,10 +169,15 @@ def train(model: nn.Module,
     optimizer.set_parameters(model.parameters(), args.optimizer)
 
     early_stopping_count = 0
-    if args.dataset == "iemocap_coid":
-        smurf_model = ThreeModalityModel(t_dim=768, a_dim=512, v_dim=1024, out_dim=256, final_dim=256).to(device)
-    elif args.dataset == "meld_coid":
-        smurf_model = ThreeModalityModel(t_dim=768, a_dim=300, v_dim=342, out_dim=256, final_dim=256).to(device)
+    if args.use_divide and args.use_refine:
+        input_dim = args.input_embedding_dim[args.dataset]
+        smurf_model = ThreeModalityModel(
+            t_dim=input_dim["t"],
+            a_dim=input_dim["a"],
+            v_dim=input_dim["v"],
+            out_dim=args.divide_dim,
+            final_dim=len(args.dataset_label_dict[args.dataset]),
+        ).to(device)
     else:
         smurf_model = None
     ## representation pretraining (input: representations of 3 modalities, output: new representations of 3 modalities with 3 components decomposed: unique, shared1, shared2)
@@ -413,7 +421,11 @@ def get_argurment():
     parser.add_argument(
         "--dataset",
         type=str,
-        choices=["iemocap", "meld", "iemocap_coid", "meld_coid"],
+        choices=[
+            "iemocap", "meld", "mosi", "mosei", "humor", "sarcasm",
+            "iemocap_coid", "meld_coid", "mosi_coid", "mosei_coid",
+            "humor_coid", "sarcasm_coid",
+        ],
         default="iemocap",
     )
 
@@ -600,36 +612,64 @@ def get_argurment():
     parser.add_argument(
         "--use_hightway", action="store_true", default=False,
     )
+    parser.add_argument(
+        "--divide_dim", type=int, default=256,
+        help="Per-component output dimension for Divide before concatenating U/R/S representations.",
+    )
+    parser.add_argument(
+        "--pretrain_epochs", type=int, default=200,
+        help="Number of Divide/SMURF pretraining epochs before backbone training.",
+    )
 
     args, unknown = parser.parse_known_args()
 
-    args.embedding_dim = {
+    raw_embedding_dim = {
         "iemocap": {
             "a": 512,
             "t": 768,
             "v": 1024,
         },
         "mosei": {
-            "a": 512,
-            "t": 768,
-            "v": 1024,
+            "a": 74,
+            "t": 300,
+            "v": 35,
+        },
+        "mosi": {
+            "a": 5,
+            "t": 300,
+            "v": 20,
+        },
+        "humor": {
+            "a": 81,
+            "t": 300,
+            "v": 371,
+        },
+        "sarcasm": {
+            "a": 81,
+            "t": 300,
+            "v": 371,
         },
         "meld": {
             "a": 300,
             "t": 768,
             "v": 342,
         },
-        "iemocap_coid": { # all dim 768
-            "a": 768,
-            "t": 768,
-            "v": 768,
-        },
-        "meld_coid": { # all dim 768
-            "a": 768,
-            "t": 768,
-            "v": 768,
-        },
     }
+    refined_embedding_dim = {m: 3 * args.divide_dim for m in ["a", "t", "v"]}
+    args.input_embedding_dim = {}
+    args.embedding_dim = {}
+    for dataset in [
+        "iemocap", "meld", "mosi", "mosei", "humor", "sarcasm",
+        "iemocap_coid", "meld_coid", "mosi_coid", "mosei_coid",
+        "humor_coid", "sarcasm_coid",
+    ]:
+        base = base_dataset_name(dataset)
+        args.input_embedding_dim[dataset] = raw_embedding_dim[base]
+        args.embedding_dim[dataset] = (
+            refined_embedding_dim
+            if args.use_refine or dataset.endswith("_coid")
+            else raw_embedding_dim[base]
+        )
 
     args.dataset_label_dict = {
         "iemocap": {"hap": 0, "sad": 1, "neu": 2, "ang": 3, "exc": 4, "fru": 5},
@@ -638,6 +678,14 @@ def get_argurment():
         "iemocap_4_coid": {"hap": 0, "sad": 1, "neu": 2, "ang": 3},
         "meld": {"neu": 0, "sup": 1, "fea": 2, "sad": 3, "joy": 4, "dis": 5, "ang": 6},
         "meld_coid": {"neu": 0, "sup": 1, "fea": 2, "sad": 3, "joy": 4, "dis": 5, "ang": 6},
+        "mosi": {"neg": 0, "pos": 1},
+        "mosi_coid": {"neg": 0, "pos": 1},
+        "mosei": {"neg": 0, "pos": 1},
+        "mosei_coid": {"neg": 0, "pos": 1},
+        "humor": {"not_humor": 0, "humor": 1},
+        "humor_coid": {"not_humor": 0, "humor": 1},
+        "sarcasm": {"not_sarcasm": 0, "sarcasm": 1},
+        "sarcasm_coid": {"not_sarcasm": 0, "sarcasm": 1},
         "mosei7": {
             "Strong Negative": 0,
             "Weak Negative": 1,
@@ -658,6 +706,14 @@ def get_argurment():
         "iemocap_4_coid": 2,
         "mosei7": 1,
         "mosei2": 1,
+        "mosi": 1,
+        "mosi_coid": 1,
+        "mosei": 1,
+        "mosei_coid": 1,
+        "humor": 1,
+        "humor_coid": 1,
+        "sarcasm": 1,
+        "sarcasm_coid": 1,
         "meld": 8,
         "meld_coid": 8,
     }
@@ -676,10 +732,20 @@ def get_argurment():
 def main(args):
     set_seed(args.seed)
 
-    if "iemocap" in args.dataset:
+    base_dataset = base_dataset_name(args.dataset)
+    if base_dataset == "iemocap":
         data = load_iemocap()
-    if "meld" in args.dataset:
+    elif base_dataset == "meld":
         data = load_meld()
+    elif base_dataset in ["mosi", "mosei", "humor", "sarcasm"]:
+        data = load_affect_dataset(base_dataset)
+    else:
+        raise ValueError(f"Unsupported dataset: {args.dataset}")
+
+    inferred_dims = infer_feature_dims(data)
+    args.input_embedding_dim[args.dataset] = inferred_dims
+    if not (args.use_refine or args.dataset.endswith("_coid")):
+        args.embedding_dim[args.dataset] = inferred_dims
 
     train_set = Dataloader(data["train"], args)
     dev_set = Dataloader(data["dev"], args)
@@ -689,6 +755,8 @@ def main(args):
     model = Model(args).to(args.device)
 
     if args.comet:
+        if Experiment is None:
+            raise ImportError("Install comet_ml or run without --comet.")
         logger = Experiment(project_name=args.project_name,
                             api_key=args.comet_api,
                             workspace=args.comet_workspace,

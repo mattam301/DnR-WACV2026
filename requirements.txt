@@ -4,3 +4,12 @@ scikit_learn==1.7.0
 torch==2.7.1
 torch_geometric==2.6.1
 tqdm==4.67.1
+gdown==5.2.0
+seaborn
+omegaconf
+hydra-core
+pytorch-lightning
+torchvision
+tensorboard
+pandas
+einops
