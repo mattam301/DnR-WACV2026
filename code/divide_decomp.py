@@ -6,12 +6,14 @@ class ModalityBranch(nn.Module):
     """One modality branch: maps input to 3 outputs (private, shared1, shared2)."""
     def __init__(self, in_dim, out_dim):
         super().__init__()
+        self.norm = nn.LayerNorm(in_dim)
         self.fc_private = nn.Linear(in_dim, out_dim)
         self.fc_shared1 = nn.Linear(in_dim, out_dim)
         self.fc_shared2 = nn.Linear(in_dim, out_dim)
 
     def forward(self, x):
         x = x.to(next(self.parameters()).device)
+        x = self.norm(x)
         y_hat   = self.fc_private(x)
         y_hat_1 = self.fc_shared1(x)
         y_hat_2 = self.fc_shared2(x)
@@ -41,20 +43,32 @@ class ThreeModalityModel(nn.Module):
         return m1, m2, m3, final_repr
 
 
-def safe_cov(a, b):
-    # flatten batch and seq if needed
-    a = a.reshape(-1, a.shape[-1])  # [total_samples, dim]
-    b = b.reshape(-1, b.shape[-1])
+def _flatten_valid(x, lengths=None):
+    """Flatten [seq, batch, dim] tensors while dropping padded utterances."""
+    if lengths is None:
+        return x.reshape(-1, x.shape[-1])
 
-    # transpose to [dim, total_samples]
-    a = a.T
-    b = b.T
+    seq_len, batch_size = x.shape[:2]
+    steps = torch.arange(seq_len, device=x.device).unsqueeze(1)
+    mask = steps < lengths.to(x.device).unsqueeze(0)
+    return x[mask]
 
-    # concat along variables
-    x = torch.cat([a, b], dim=0)  # [2*dim, total_samples]
-    return torch.cov(x)
 
-def compute_corr_loss(m1, m2, m3):
+def _feature_corr(a, b, lengths=None, eps=1e-6):
+    """Mean Pearson correlation between matching feature dimensions."""
+    a = _flatten_valid(a, lengths)
+    b = _flatten_valid(b, lengths)
+    if a.shape[0] < 2:
+        return a.new_zeros(())
+
+    a = a - a.mean(dim=0, keepdim=True)
+    b = b - b.mean(dim=0, keepdim=True)
+    a = a / a.std(dim=0, unbiased=False, keepdim=True).clamp_min(eps)
+    b = b / b.std(dim=0, unbiased=False, keepdim=True).clamp_min(eps)
+    return (a * b).mean(dim=0).clamp(-1.0, 1.0)
+
+
+def compute_corr_loss(m1, m2, m3, lengths=None):
     """
     m1, m2, m3: each is a tuple of (hat, hat_1, hat_2)
        - hat   : independent head
@@ -77,7 +91,7 @@ def compute_corr_loss(m1, m2, m3):
     ]
 
     L_unco = sum(
-        torch.mean(torch.abs(safe_cov(a, b)[0, 1]))
+        torch.mean(torch.abs(_feature_corr(a, b, lengths)))
         for a, b in unco_pairs
     ) / len(unco_pairs)
 
@@ -97,11 +111,8 @@ def compute_corr_loss(m1, m2, m3):
 
     cor_terms = []
     for a, b in cross_pairs:
-        cov = safe_cov(a, b)
-        cov_ab = cov[0, 1]
-        var_a = cov[0, 0]
-        var_b = cov[1, 1]
-        cor_terms.append((-1.0) * cov_ab + 0.5 * var_a * var_b)
+        corr = _feature_corr(a, b, lengths)
+        cor_terms.append(1.0 - torch.mean(torch.abs(corr)))
 
     L_cor = sum(cor_terms) / len(cor_terms)
     

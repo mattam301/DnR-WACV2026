@@ -59,7 +59,7 @@ def smurf_pretrain(smurf_model: ThreeModalityModel, train_set: Dataloader, args)
                 visualf = (visualf.permute(1, 2, 0)).transpose(1, 2)
                 #
                 m1, m2, m3, final_repr = smurf_model(textf, audiof, visualf)
-                corr_loss, L_uncor, L_cor = compute_corr_loss(m1, m2, m3)
+                corr_loss, L_uncor, L_cor = compute_corr_loss(m1, m2, m3, data["length"])
                 # Compare tensors m1[0] and m1[2]
                 if epoch % 10 == 0 and idx == 0:  # visualize once per 10 epochs, first batch
                     visualize_embeddings(m1, m2, m3, epoch, method="pca")
@@ -78,6 +78,12 @@ def smurf_pretrain(smurf_model: ThreeModalityModel, train_set: Dataloader, args)
                 criterion = nn.NLLLoss()
                 nll = criterion(prob_smurf, labels)
                 loss = nll + 5*corr_loss
+                if not torch.isfinite(loss):
+                    raise RuntimeError(
+                        "Non-finite SMURF pretrain loss. "
+                        f"nll={nll.item():.6g}, corr={corr_loss.item():.6g}, "
+                        f"L_cor={L_cor.item():.6g}, L_uncor={L_uncor.item():.6g}"
+                    )
                 loss.backward()
                 torch.nn.utils.clip_grad_norm_(
                     smurf_model.parameters(), max_norm=args.grad_norm_max, norm_type=args.grad_norm)
@@ -95,7 +101,9 @@ def generate_all_data_versions(self, data, smurf_model):
         textf = (x1.permute(1, 2, 0)).transpose(1, 2)
         audiof = (x2.permute(1, 2, 0)).transpose(1, 2)
         visualf = (x3.permute(1, 2, 0)).transpose(1, 2)
-        m1, m2, m3, final_repr = smurf_model(textf, audiof, visualf)
+        smurf_model.eval()
+        with torch.no_grad():
+            m1, m2, m3, final_repr = smurf_model(textf, audiof, visualf)
         
         # Original data
         ori_data = copy.deepcopy(data)
@@ -187,6 +195,9 @@ def train(model: nn.Module,
         # Save pretrained SMURF
         torch.save(smurf_model.state_dict(), "smurf_pretrained.pt")
         print("✅ SMURF pretrained model saved to smurf_pretrained.pt")
+        smurf_model.eval()
+        for param in smurf_model.parameters():
+            param.requires_grad_(False)
     
     ## legacy training module/backbone
     for epoch in range(args.epochs):
