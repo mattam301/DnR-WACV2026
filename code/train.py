@@ -4,7 +4,9 @@ import argparse
 import os
 import time
 from datetime import datetime
-from comm_loss import CoMMLoss 
+from comm_loss import CoMMLoss
+from backbone.simple_backbone import SimpleMultimodalModel
+
 
 try:
     from comet_ml import Experiment
@@ -26,138 +28,330 @@ from dataloader import base_dataset_name, infer_feature_dims, load_affect_datase
 from optimizer import Optimizer
 from utils import set_seed, weight_visualize, info_nce_loss, visualize_embeddings, forward_masked_augmented
 import json
-from divide_decomp import ThreeModalityModel, compute_corr_loss
+# from divide_decomp import ThreeModalityModel, compute_corr_loss
+from new_divide_decomp import ThreeModalityModel, compute_corr_loss
+from dnr_kld_analysis import run_dnr_kld_analysis
 
 def smurf_pretrain(smurf_model: ThreeModalityModel, train_set: Dataloader, args):
+    """
+    Pretrain SMURF with two optimizers / two effective learning rates.
+
+    Why this version?
+    -----------------
+    In practice, the standard NLL head usually converges much faster than:
+      - disentanglement loss (corr)
+      - synergy loss
+
+    If all parameters share one optimizer / one LR, the model often finds
+    a good task solution first, while u/r/s disentanglement keeps moving
+    very slowly.  This function separates the parameter groups:
+
+      main optimizer:
+        - branch LayerNorm
+        - unique heads
+        - shared heads
+        - fusion classifier
+
+      synergy optimizer:
+        - synergy heads in each branch
+        - synergy module itself
+
+    This makes the synergy-related subnetwork learn faster without forcing
+    the whole SMURF model to use a too-large LR.
+
+    Assumptions
+    -----------
+    - smurf_model has attributes:
+        branch_t, branch_a, branch_v, fusion, synergy
+    - each branch has:
+        norm, fc_unique, fc_shared, fc_synergy
+    - labels in data["label_tensor"] are already flattened to match
+      the masked utterance logits used by NLLLoss.
+    """
+
     m1, m2, m3, final_repr = None, None, None, None
     device = args.device
-    if args.use_divide and args.use_refine:
-        print("Pretraining SMURF module...")
-        optim = Optimizer(args.learning_rate, args.weight_decay)
-        optim.set_parameters(smurf_model.parameters(), args.optimizer)
-        smurf_model.to(device)
-        for epoch in range(args.pretrain_epochs):
-            for idx in (pbar := tqdm(range(len(train_set)), desc=f"Epoch {epoch+1}")):
-                smurf_model.zero_grad()
-                data = train_set[idx]
-                for k, v in data.items():
-                    if k == "utterance_texts":
-                        continue
-                    if k == "tensor":
-                        for m, feat in data[k].items():
-                            data[k][m] = feat.to(device)
-                    else:
-                        data[k] = v.to(device)
-                labels = data["label_tensor"]
-                sample_idx = data["uid"]
-                textf = data["tensor"]['t']
-                audiof = data["tensor"]['a']
-                visualf = data["tensor"]['v']
 
-                textf = (textf.permute(1, 2, 0)).transpose(1, 2)
-                audiof = (audiof.permute(1, 2, 0)).transpose(1, 2)
-                visualf = (visualf.permute(1, 2, 0)).transpose(1, 2)
-                #
-                m1, m2, m3, final_repr = smurf_model(textf, audiof, visualf)
-                corr_loss, L_uncor, L_cor = compute_corr_loss(m1, m2, m3, data["length"])
-                # Compare tensors m1[0] and m1[2]
-                if epoch % 10 == 0 and idx == 0:  # visualize once per 10 epochs, first batch
-                    visualize_embeddings(m1, m2, m3, epoch, method="pca")
-                    visualize_embeddings(m1, m2, m3, epoch, method="tsne")
-                final_logits = final_repr
-    
-                # mask out padding and flatten (hot fix)
-                logit_smurf = final_logits.permute(1, 0, 2)  # -> [batch, seq, n_classes]
-                masked_logits = []
-                for i, L in enumerate(data["length"]):  # lengths per dialogue
-                    masked_logits.append(logit_smurf[i, :L])  # keep only valid utterances
-                logit_smurf = torch.cat(masked_logits, dim=0)  # -> [sum(lengths), n_classes]
-                # now prob_smurf matches joint/logit shape
-                prob_smurf = F.log_softmax(logit_smurf, dim=-1)
-                # predict loss
-                criterion = nn.NLLLoss()
-                nll = criterion(prob_smurf, labels)
-                loss = nll + 5*corr_loss
-                if not torch.isfinite(loss):
-                    raise RuntimeError(
-                        "Non-finite SMURF pretrain loss. "
-                        f"nll={nll.item():.6g}, corr={corr_loss.item():.6g}, "
-                        f"L_cor={L_cor.item():.6g}, L_uncor={L_uncor.item():.6g}"
-                    )
-                loss.backward()
-                torch.nn.utils.clip_grad_norm_(
-                    smurf_model.parameters(), max_norm=args.grad_norm_max, norm_type=args.grad_norm)
-                optim.step()
-                pbar.set_description(f"Pretrained Epoch {epoch+1}, Pretrain loss {loss:,.4f}, Corr loss {L_cor:,.4f}, Uncorr loss {L_uncor:,.4f}")
-                
+    if not (args.use_divide and args.use_refine):
+        return m1, m2, m3, final_repr, smurf_model
+
+    print("Pretraining SMURF module...")
+
+    # ------------------------------------------------------------------
+    # Hyperparameters / fallbacks
+    # ------------------------------------------------------------------
+    base_lr      = getattr(args, "learning_rate", 2e-4)
+    weight_decay = getattr(args, "weight_decay", 1e-8)
+    lambda_corr  = getattr(args, "lambda_corr", 5.0)
+    lambda_syn   = getattr(args, "lambda_syn", 0.5)
+
+    # Main idea of the "first fix":
+    # give the synergy-related params a larger LR
+    syn_lr_mult  = getattr(args, "smurf_syn_lr_mult", 3.0)
+
+    main_lr = base_lr
+    syn_lr  = base_lr * syn_lr_mult
+
+    # ------------------------------------------------------------------
+    # Build parameter groups
+    # ------------------------------------------------------------------
+    branches = [smurf_model.branch_t, smurf_model.branch_a, smurf_model.branch_v]
+
+    main_params = []
+    syn_params  = []
+
+    for branch in branches:
+        # Main params: norm + unique + shared
+        main_params.extend(list(branch.norm.parameters()))
+        main_params.extend(list(branch.fc_unique.parameters()))
+        main_params.extend(list(branch.fc_shared.parameters()))
+
+        # Synergy params: synergy head only
+        syn_params.extend(list(branch.fc_synergy.parameters()))
+
+    # Fusion head belongs to the "main" path
+    main_params.extend(list(smurf_model.fusion.parameters()))
+
+    # Synergy module gets the higher-LR optimizer
+    syn_params.extend(list(smurf_model.synergy.parameters()))
+
+    # Safety check: no overlap between optimizers
+    main_param_ids = {id(p) for p in main_params}
+    syn_param_ids  = {id(p) for p in syn_params}
+    overlap = main_param_ids.intersection(syn_param_ids)
+    if len(overlap) > 0:
+        raise RuntimeError("SMURF pretrain optimizers have overlapping parameter groups.")
+
+    # ------------------------------------------------------------------
+    # Build optimizers
+    # ------------------------------------------------------------------
+    def make_torch_optimizer(params, lr):
+        opt_name = args.optimizer.lower()
+        if opt_name == "adam":
+            return torch.optim.Adam(params, lr=lr, weight_decay=weight_decay)
+        elif opt_name == "adamw":
+            return torch.optim.AdamW(params, lr=lr, weight_decay=weight_decay)
+        elif opt_name == "sgd":
+            return torch.optim.SGD(params, lr=lr, weight_decay=weight_decay, momentum=0.9)
+        elif opt_name == "rmsprop":
+            return torch.optim.RMSprop(params, lr=lr, weight_decay=weight_decay)
+        else:
+            raise ValueError(f"Unsupported optimizer for SMURF pretrain: {args.optimizer}")
+
+    optim_main = make_torch_optimizer(main_params, main_lr)
+    optim_syn  = make_torch_optimizer(syn_params,  syn_lr)
+
+    criterion = nn.NLLLoss()
+    smurf_model.to(device)
+
+    for epoch in range(args.pretrain_epochs):
+        smurf_model.train()
+
+        for idx in (pbar := tqdm(range(len(train_set)), desc=f"SMURF Epoch {epoch+1}")):
+            optim_main.zero_grad(set_to_none=True)
+            optim_syn.zero_grad(set_to_none=True)
+
+            data = train_set[idx]
+            for k, v in data.items():
+                if k == "utterance_texts":
+                    continue
+                if k == "tensor":
+                    for m, feat in data[k].items():
+                        data[k][m] = feat.to(device)
+                else:
+                    data[k] = v.to(device)
+
+            labels = data["label_tensor"]
+
+            # Raw modality features from dataloader
+            textf   = data["tensor"]['t']
+            audiof  = data["tensor"]['a']
+            visualf = data["tensor"]['v']
+
+            # Match SMURF expected format: [seq, batch, dim]
+            textf   = (textf.permute(1, 2, 0)).transpose(1, 2)
+            audiof  = (audiof.permute(1, 2, 0)).transpose(1, 2)
+            visualf = (visualf.permute(1, 2, 0)).transpose(1, 2)
+
+            # ----------------------------------------------------------
+            # Forward
+            # ----------------------------------------------------------
+            m1, m2, m3, final_repr = smurf_model(textf, audiof, visualf)
+
+            # ----------------------------------------------------------
+            # Correlation / disentanglement loss
+            # ----------------------------------------------------------
+            corr_loss, L_uncor, L_cor = compute_corr_loss(
+                m1, m2, m3, data["length"]
+            )
+
+            # ----------------------------------------------------------
+            # Synergy loss
+            # ----------------------------------------------------------
+            # Assumes labels are already flattened exactly like the NLL targets
+            L_syn, L_joint, L_guard = smurf_model.compute_synergy_loss(
+                m1, m2, m3,
+                labels=labels,
+                lengths=data["length"],
+            )
+
+            # ----------------------------------------------------------
+            # Visualisation
+            # ----------------------------------------------------------
+            if epoch % 10 == 0 and idx == 0:
+                visualize_embeddings(m1, m2, m3, epoch, method="pca")
+                visualize_embeddings(m1, m2, m3, epoch, method="tsne")
+
+            # ----------------------------------------------------------
+            # Main NLL loss from SMURF fusion head
+            # final_repr is [seq, batch, n_classes]
+            # Need to remove padding positions before NLL
+            # ----------------------------------------------------------
+            logit_smurf = final_repr.permute(1, 0, 2)   # [batch, seq, n_classes]
+            masked_logits = []
+            for i, L in enumerate(data["length"]):
+                masked_logits.append(logit_smurf[i, :L])
+            logit_smurf = torch.cat(masked_logits, dim=0)   # [sum(lengths), n_classes]
+
+            prob_smurf = F.log_softmax(logit_smurf, dim=-1)
+            nll = criterion(prob_smurf, labels)
+
+            # ----------------------------------------------------------
+            # Total loss
+            # ----------------------------------------------------------
+            loss = nll + lambda_corr * corr_loss + lambda_syn * L_syn
+
+            if not torch.isfinite(loss):
+                raise RuntimeError(
+                    "Non-finite SMURF pretrain loss. "
+                    f"nll={nll.item():.6g}, "
+                    f"corr={corr_loss.item():.6g}, "
+                    f"L_uncor={L_uncor.item():.6g}, "
+                    f"L_cor={L_cor.item():.6g}, "
+                    f"L_syn={L_syn.item():.6g}, "
+                    f"L_joint={L_joint.item():.6g}, "
+                    f"L_guard={L_guard.item():.6g}"
+                )
+
+            loss.backward()
+
+            torch.nn.utils.clip_grad_norm_(
+                smurf_model.parameters(),
+                max_norm=args.grad_norm_max,
+                norm_type=args.grad_norm
+            )
+
+            optim_main.step()
+            optim_syn.step()
+
+            if epoch % 50 == 0:
+                pbar.set_description(
+                    f"Epoch {epoch+1} | "
+                    f"loss={loss.item():.4f} "
+                    f"nll={nll.item():.4f} "
+                    f"corr={corr_loss.item():.4f} "
+                    f"syn={L_syn.item():.4f} "
+                    f"joint={L_joint.item():.4f} "
+                    f"guard={L_guard.item():.4f} "
+                    f"lr_main={main_lr:.1e} "
+                    f"lr_syn={syn_lr:.1e}"
+                )
+
     return m1, m2, m3, final_repr, smurf_model
 
 def generate_all_data_versions(self, data, smurf_model):
-        data_versions = []
-        # data refinement
-        x1 = data["tensor"]['t']
-        x2 = data["tensor"]['a']
-        x3 = data["tensor"]['v']
-        textf = (x1.permute(1, 2, 0)).transpose(1, 2)
-        audiof = (x2.permute(1, 2, 0)).transpose(1, 2)
-        visualf = (x3.permute(1, 2, 0)).transpose(1, 2)
-        smurf_model.eval()
-        with torch.no_grad():
-            m1, m2, m3, final_repr = smurf_model(textf, audiof, visualf)
-        
-        # Original data
-        ori_data = copy.deepcopy(data)
-        # concat instead of sum -> tensor dim x 3
-        ori_data["tensor"] = {
-            "t": torch.cat([m1[0], m1[1], m1[2]], dim=-1),
-            "a": torch.cat([m2[0], m2[1], m2[2]], dim=-1),
-            "v": torch.cat([m3[0], m3[1], m3[2]], dim=-1),
-        }
-        data_versions.append(ori_data)
-        # Masked data (one modality left unmasked at a time)
-        for i, m in enumerate(self.modalities):
-            masked_data = {}
-            for j, m in enumerate(self.modalities):
-                if i == j:
-                    masked_data[m] = ori_data["tensor"][m]
-                else:
-                    masked_data[m] = torch.zeros_like(ori_data["tensor"][m])
-            data_versions.append({
-                "tensor": masked_data,
-                "length": data["length"],
-                "label_tensor": data["label_tensor"],
-                "speaker_tensor": data["speaker_tensor"]
-            })
-        augment1_1 = m1[1] + torch.randn_like(m1[1]) * 0.2
-        augment1_2 = m2[1] + torch.randn_like(m2[1]) * 0.2
-        augment1_3 = m3[1] + torch.randn_like(m3[1]) * 0.2
-        augmented_data = copy.deepcopy(data)
-        augmented_data["tensor"] = {
-            "t": torch.cat([m1[0], augment1_1, m1[2]], dim=-1),
-            "a": torch.cat([m2[0], augment1_2, m2[2]], dim=-1),
-            "v": torch.cat([m3[0], augment1_3, m3[2]], dim=-1),
-        }
-        data_versions.append(augmented_data)
+    data_versions = []
+    x1 = data["tensor"]['t']
+    x2 = data["tensor"]['a']
+    x3 = data["tensor"]['v']
+    textf   = (x1.permute(1, 2, 0)).transpose(1, 2)
+    audiof  = (x2.permute(1, 2, 0)).transpose(1, 2)
+    visualf = (x3.permute(1, 2, 0)).transpose(1, 2)
+    smurf_model.eval()
+    with torch.no_grad():
+        m1, m2, m3, final_repr = smurf_model(textf, audiof, visualf)
 
-        augmented_data = copy.deepcopy(data)
-        augment2_1 = m1[1] + torch.randn_like(m1[1]) * 0.1
-        augment2_2 = m2[1] + torch.randn_like(m2[1]) * 0.1
-        augment2_3 = m3[1] + torch.randn_like(m3[1]) * 0.1
-        augmented_data["tensor"] = {
-            "t": torch.cat([m1[0], augment2_1, m1[2]], dim=-1),
-            "a": torch.cat([m2[0], augment2_2, m2[2]], dim=-1),
-            "v": torch.cat([m3[0], augment2_3, m3[2]], dim=-1),
-        }
-        data_versions.append(augmented_data)
-        
-        # transpose all versions back to original shape
-        for version in data_versions:
-            version["tensor"] = {
-                m: feat.transpose(0, 1) if isinstance(feat, torch.Tensor) else (feat[0].transpose(0,1), feat[1].transpose(0,1), feat[2].transpose(0,1))
-                for m, feat in version["tensor"].items()
-            }
+    # ── Compute cross-modal relationship features ─────────────────
+    # These capture agreement/contradiction between modalities
+    # using the already-decomposed u, r, s vectors.
+    #
+    # For each pair (i, j):
+    #   agreement:    u_i * u_j     (element-wise, high when similar)
+    #   discrepancy:  u_i - u_j     (high when different)
+    #   shared_diff:  r_i - r_j     (should be ~0 if alignment worked)
+    #
+    # We concatenate these alongside the standard [u, r, s]
+    # so the backbone can explicitly see cross-modal relationships.
+    #
+    # Why this works for sarcasm:
+    #   u_t encodes "text says positive"
+    #   u_a encodes "audio is flat/negative"
+    #   u_t - u_a is LARGE → explicit contradiction signal
+    #   The backbone no longer needs to re-discover this.
 
-        return data_versions
+    u1, r1, s1 = m1
+    u2, r2, s2 = m2
+    u3, r3, s3 = m3
+
+    # Cross-modal features for each modality
+    # Modality t gets its relationship with a and v
+    cross_t = torch.cat([u1 - u2, u1 - u3, u1 * u2, u1 * u3], dim=-1)
+    cross_a = torch.cat([u2 - u1, u2 - u3, u2 * u1, u2 * u3], dim=-1)
+    cross_v = torch.cat([u3 - u1, u3 - u2, u3 * u1, u3 * u2], dim=-1)
+
+    # ── Original data ─────────────────────────────────────────────
+    ori_data = copy.deepcopy(data)
+    ori_data["tensor"] = {
+        "t": torch.cat([u1, r1, s1, cross_t], dim=-1),
+        "a": torch.cat([u2, r2, s2, cross_a], dim=-1),
+        "v": torch.cat([u3, r3, s3, cross_v], dim=-1),
+    }
+    data_versions.append(ori_data)
+
+    # ── Masked data ───────────────────────────────────────────────
+    for i, mod_key in enumerate(self.modalities):
+        masked_data = {}
+        for j, mod_key2 in enumerate(self.modalities):
+            if i == j:
+                masked_data[mod_key2] = ori_data["tensor"][mod_key2]
+            else:
+                masked_data[mod_key2] = torch.zeros_like(
+                    ori_data["tensor"][mod_key2]
+                )
+        data_versions.append({
+            "tensor": masked_data,
+            "length": data["length"],
+            "label_tensor": data["label_tensor"],
+            "speaker_tensor": data["speaker_tensor"],
+        })
+
+    # ── Augmented data (noise on r only) ──────────────────────────
+    for noise_std in [0.2, 0.1]:
+        aug_r1 = r1 + torch.randn_like(r1) * noise_std
+        aug_r2 = r2 + torch.randn_like(r2) * noise_std
+        aug_r3 = r3 + torch.randn_like(r3) * noise_std
+
+        # Cross-modal features stay the same (computed from u, not r)
+        aug_data = copy.deepcopy(data)
+        aug_data["tensor"] = {
+            "t": torch.cat([u1, aug_r1, s1, cross_t], dim=-1),
+            "a": torch.cat([u2, aug_r2, s2, cross_a], dim=-1),
+            "v": torch.cat([u3, aug_r3, s3, cross_v], dim=-1),
+        }
+        data_versions.append(aug_data)
+
+    # ── Transpose back ────────────────────────────────────────────
+    for version in data_versions:
+        version["tensor"] = {
+            m: (feat.transpose(0, 1)
+                if isinstance(feat, torch.Tensor)
+                else (feat[0].transpose(0, 1),
+                      feat[1].transpose(0, 1),
+                      feat[2].transpose(0, 1)))
+            for m, feat in version["tensor"].items()
+        }
+
+    return data_versions
 def train(model: nn.Module,
           train_set: Dataloader,
           dev_set: Dataloader,
@@ -279,22 +473,22 @@ def train(model: nn.Module,
 
             optimizer.step()
             
-            pbar.set_description(f"Epoch {epoch+1}, Train loss {loss.item():,.4f}")
+            # pbar.set_description(f"Epoch {epoch+1}, Train loss {loss.item():,.4f}")
 
             del data
-
-        end_time = time.time()
-        print(
-            f"[Epoch {epoch}] [Time: {end_time - start_time}]")
-        for m in modalities:
-            print(f'Ratio {m}: {ratio[m].item()}', end=" ")
-        print()
+        if epoch % 10 == 0:
+            end_time = time.time()
+            print(
+                f"[Epoch {epoch}] [Time: {end_time - start_time}]")
+            for m in modalities:
+                print(f'Ratio {m}: {ratio[m].item()}', end=" ")
         if args.use_cl:
             rate = total_take_sample / total_sample
             print(f"[Rate: {rate}, Threshold: {model.threshold}]")
 
         dev_f1, dev_acc, dev_loss = evaluate(model, smurf_model, dev_set, args, logger, test=False)
-        print(f"[Dev Loss: {dev_loss}]\n[Dev F1: {dev_f1}]\n[Dev Acc: {dev_acc}]")
+        if epoch % 10 == 0:    
+            print(f"[Dev Loss: {dev_loss}]\n[Dev F1: {dev_f1}]\n[Dev Acc: {dev_acc}]")
 
         if args.use_cl:
             model.increase_threshold()
@@ -334,6 +528,17 @@ def train(model: nn.Module,
     print(f"Best test F1: {f1}")
     print(f"Best test Acc: {acc}")
 
+    # Optional post-hoc interpretability pass for DnR.
+    # It is intentionally run after best-model evaluation so the KLD reports
+    # explain the same checkpoint used for the final test metrics.
+    if args.run_kld_analysis:
+        if not (args.use_divide and args.use_refine):
+            raise ValueError("--run_kld_analysis requires --use_divide --use_refine.")
+        summary = run_dnr_kld_analysis(
+            model, smurf_model, test_set, args, split_name="test"
+        )
+        print(f"KLD analysis saved to: {summary['files']}")
+
     if args.comet:
         logger.log_metric("best_test_f1", f1, epoch=epoch)
         logger.log_metric("best_test_acc", acc, epoch=epoch)
@@ -344,12 +549,9 @@ def train(model: nn.Module,
 
 def evaluate(model, smurf_model, dataset, args, logger, test=True):
     criterion = nn.NLLLoss()
-
     device = args.device
     model.eval()
-
     label_dict = args.dataset_label_dict[args.dataset]
-
     labels_name = list(label_dict.keys())
 
     with torch.no_grad():
@@ -365,37 +567,47 @@ def evaluate(model, smurf_model, dataset, args, logger, test=True):
                         data[k][m] = feat.to(device)
                 else:
                     data[k] = v.to(device)
+
             if args.use_divide and args.use_refine:
                 x1 = data["tensor"]['t']
                 x2 = data["tensor"]['a']
                 x3 = data["tensor"]['v']
-                textf = (x1.permute(1, 2, 0)).transpose(1, 2)
-                audiof = (x2.permute(1, 2, 0)).transpose(1, 2)
+                textf   = (x1.permute(1, 2, 0)).transpose(1, 2)
+                audiof  = (x2.permute(1, 2, 0)).transpose(1, 2)
                 visualf = (x3.permute(1, 2, 0)).transpose(1, 2)
                 m1, m2, m3, final_repr = smurf_model(textf, audiof, visualf)
-                textf = torch.cat([m1[0], m1[1], m1[2]], dim=-1)
-                audiof = torch.cat([m2[0], m2[1], m2[2]], dim=-1)
-                visualf = torch.cat([m3[0], m3[1], m3[2]], dim=-1)
-                # update data tensor
-                # check
-                data["tensor"]['t'] = textf.transpose(0,1)
-                data["tensor"]['a'] = audiof.transpose(0,1)
-                data["tensor"]['v'] = visualf.transpose(0,1)
+
+                u1, r1, s1 = m1
+                u2, r2, s2 = m2
+                u3, r3, s3 = m3
+
+                # Same cross-modal features as training
+                cross_t = torch.cat([u1-u2, u1-u3, u1*u2, u1*u3], dim=-1)
+                cross_a = torch.cat([u2-u1, u2-u3, u2*u1, u2*u3], dim=-1)
+                cross_v = torch.cat([u3-u1, u3-u2, u3*u1, u3*u2], dim=-1)
+
+                data["tensor"]['t'] = torch.cat(
+                    [u1, r1, s1, cross_t], dim=-1
+                ).transpose(0, 1)
+                data["tensor"]['a'] = torch.cat(
+                    [u2, r2, s2, cross_a], dim=-1
+                ).transpose(0, 1)
+                data["tensor"]['v'] = torch.cat(
+                    [u3, r3, s3, cross_v], dim=-1
+                ).transpose(0, 1)
+
             labels = data["label_tensor"]
             golds.append(labels.to("cpu"))
-            prob, _, _ = model(data) 
+            prob, _, _ = model(data)
             nll = criterion(prob, labels)
-
             y_hat = torch.argmax(prob, dim=-1)
             preds.append(y_hat.detach().to("cpu"))
-
             loss += nll.item()
 
         golds = torch.cat(golds, dim=-1).numpy()
         preds = torch.cat(preds, dim=-1).numpy()
-
         loss /= len(dataset)
-        f1 = metrics.f1_score(golds, preds, average="weighted")
+        f1  = metrics.f1_score(golds, preds, average="weighted")
         acc = metrics.accuracy_score(golds, preds)
 
         if test:
@@ -403,7 +615,8 @@ def evaluate(model, smurf_model, dataset, args, logger, test=True):
                 golds, preds, target_names=labels_name, digits=4))
             if args.comet:
                 logger.log_confusion_matrix(
-                    golds.tolist(), preds, labels=list(labels_name), overwrite=True)
+                    golds.tolist(), preds,
+                    labels=list(labels_name), overwrite=True)
 
         return f1, acc, loss
 
@@ -452,7 +665,7 @@ def get_argurment():
 
     parser.add_argument(
         "--backbone", type=str, default="late_fusion",
-        choices=["late_fusion", "mmgcn", "dialogue_gcn", "mm_dfn", "biddin"],
+        choices=["late_fusion", "mmgcn", "dialogue_gcn", "mm_dfn", "simple"],
     )
 
     parser.add_argument(
@@ -631,7 +844,34 @@ def get_argurment():
         "--pretrain_epochs", type=int, default=200,
         help="Number of Divide/SMURF pretraining epochs before backbone training.",
     )
-
+    parser.add_argument(
+        "--run_kld_analysis", action="store_true", default=False,
+        help="Run post-hoc KLD analysis for DnR U/R/S components after testing.",
+    )
+    parser.add_argument(
+        "--analysis_dir", type=str, default="analysis_outputs",
+        help="Directory for KLD analysis CSV/JSON outputs.",
+    )
+    parser.add_argument(
+        "--analysis_tau", type=float, default=1.0,
+        help="Temperature used to convert U/R/S vectors into distributions.",
+    )
+    parser.add_argument(
+    "--lambda_syn", type=float, default=0.5,
+    help="Weight for the synergy loss (masked reconstruction + guard).",
+    )
+    parser.add_argument(
+    "--lambda_masked", type=float, default=0.5,
+    help="Weight for the margin-based masked reconstruction synergy loss.",
+)
+    parser.add_argument(
+        "--lambda_guard", type=float, default=0.5,
+        help="Weight for the synergy orthogonality guard loss.",
+    )
+    parser.add_argument(
+    "--smurf_syn_lr_mult", type=float, default=3.0,
+    help="LR multiplier for SMURF synergy-related parameters during pretraining."
+)
     args, unknown = parser.parse_known_args()
 
     raw_embedding_dim = {
@@ -666,7 +906,7 @@ def get_argurment():
             "v": 342,
         },
     }
-    refined_embedding_dim = {m: 3 * args.divide_dim for m in ["a", "t", "v"]}
+    refined_embedding_dim = {m: 7 * args.divide_dim for m in ["a", "t", "v"]}
     args.input_embedding_dim = {}
     args.embedding_dim = {}
     for dataset in [
@@ -763,7 +1003,21 @@ def main(args):
     test_set = Dataloader(data["test"], args)
 
     optim = Optimizer(args.learning_rate, args.weight_decay)
-    model = Model(args).to(args.device)
+
+
+    # model = Model(args).to(args.device)
+
+    CONVERSATIONAL_DATASETS = {
+        "iemocap", "iemocap_coid", "iemocap_4", "iemocap_4_coid",
+        "meld", "meld_coid",
+    }
+
+    base = base_dataset_name(args.dataset)
+    if base in CONVERSATIONAL_DATASETS:
+        model = Model(args).to(args.device)
+    else:
+        model = SimpleMultimodalModel(args).to(args.device) # Other multimodal's tasks haven't been prepared -> refer to this simple backbones
+        print(f"Using SimpleMultimodalModel for non-conversational dataset: {args.dataset}")
 
     if args.comet:
         if Experiment is None:
@@ -779,10 +1033,11 @@ def main(args):
     dev_f1, test_f1, state = train(
         model, train_set, dev_set, test_set, optim, logger, args)
 
-    # checkpoint_path = os.path.join("checkpoint", f"{args.dataset}_best_f1.pt")
+    checkpoint_path = os.path.join("checkpoint", f"{args.dataset}_{args.use_refine}_best_f1.pt")
     # if not os.path.exists(checkpoint_path):
+    #     print(checkpoint_path)
     #     os.makedirs(os.path.dirname(checkpoint_path))
-    # torch.save({"args": args, "state_dict": state}, checkpoint_path)
+    torch.save({"args": args, "state_dict": state}, checkpoint_path)
 
 
 if __name__ == "__main__":

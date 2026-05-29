@@ -1,0 +1,15 @@
+dataset,backbone,modalities,method,run,acc,wf1
+mosi_coid,mmgcn,atv,baseline,1,0.7303206997084548,0.7326457671051299
+mosi_coid,mmgcn,atv,baseline,mean,73.03,73.26
+mosi_coid,mmgcn,atv,dnr,1,0.7040816326530612,0.7067498718323134
+mosi_coid,mmgcn,atv,dnr,mean,70.41,70.67
+mosi_coid,mmgcn,av,baseline,1,0.5087463556851312,0.4911117722369406
+mosi_coid,mmgcn,av,baseline,mean,50.87,49.11
+mosi_coid,mmgcn,av,dnr,1,0.6982507288629738,0.6969855285362327
+mosi_coid,mmgcn,av,dnr,mean,69.83,69.70
+mosi_coid,mmgcn,at,baseline,1,0.7405247813411079,0.7400489878974966
+mosi_coid,mmgcn,at,baseline,mean,74.05,74.00
+mosi_coid,mmgcn,at,dnr,1,0.0,0.0
+mosi_coid,mmgcn,at,dnr,mean,0.00,0.00
+mosi_coid,mmgcn,tv,baseline,1,0.0,0.0
+mosi_coid,mmgcn,tv,baseline,mean,0.00,0.00

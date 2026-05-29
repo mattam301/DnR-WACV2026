@@ -1,0 +1,107 @@
+{
+  "mosi_coid|mmgcn|atv|baseline": {
+    "dataset": "mosi_coid",
+    "backbone": "mmgcn",
+    "modalities": "atv",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 73.03,
+    "wf1_pct": 73.26,
+    "acc_raw": [
+      0.7303206997084548
+    ],
+    "f1_raw": [
+      0.7326457671051299
+    ]
+  },
+  "mosi_coid|mmgcn|atv|dnr": {
+    "dataset": "mosi_coid",
+    "backbone": "mmgcn",
+    "modalities": "atv",
+    "method": "dnr",
+    "runs": 1,
+    "acc_pct": 70.41,
+    "wf1_pct": 70.67,
+    "acc_raw": [
+      0.7040816326530612
+    ],
+    "f1_raw": [
+      0.7067498718323134
+    ]
+  },
+  "mosi_coid|mmgcn|av|baseline": {
+    "dataset": "mosi_coid",
+    "backbone": "mmgcn",
+    "modalities": "av",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 50.87,
+    "wf1_pct": 49.11,
+    "acc_raw": [
+      0.5087463556851312
+    ],
+    "f1_raw": [
+      0.4911117722369406
+    ]
+  },
+  "mosi_coid|mmgcn|av|dnr": {
+    "dataset": "mosi_coid",
+    "backbone": "mmgcn",
+    "modalities": "av",
+    "method": "dnr",
+    "runs": 1,
+    "acc_pct": 69.83,
+    "wf1_pct": 69.7,
+    "acc_raw": [
+      0.6982507288629738
+    ],
+    "f1_raw": [
+      0.6969855285362327
+    ]
+  },
+  "mosi_coid|mmgcn|at|baseline": {
+    "dataset": "mosi_coid",
+    "backbone": "mmgcn",
+    "modalities": "at",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 74.05,
+    "wf1_pct": 74.0,
+    "acc_raw": [
+      0.7405247813411079
+    ],
+    "f1_raw": [
+      0.7400489878974966
+    ]
+  },
+  "mosi_coid|mmgcn|at|dnr": {
+    "dataset": "mosi_coid",
+    "backbone": "mmgcn",
+    "modalities": "at",
+    "method": "dnr",
+    "runs": 1,
+    "acc_pct": 0.0,
+    "wf1_pct": 0.0,
+    "acc_raw": [
+      0.0
+    ],
+    "f1_raw": [
+      0.0
+    ]
+  },
+  "mosi_coid|mmgcn|tv|baseline": {
+    "dataset": "mosi_coid",
+    "backbone": "mmgcn",
+    "modalities": "tv",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 0.0,
+    "wf1_pct": 0.0,
+    "acc_raw": [
+      0.0
+    ],
+    "f1_raw": [
+      0.0
+    ]
+  }
+}

@@ -24,8 +24,8 @@ class Model(nn.Module):
 
         self.args = args
         self.modalities = args.modalities
-        self.threshold = args.cl_threshold
-        self.growing_factor = args.cl_growth
+        # self.threshold = args.cl_threshold
+        # self.growing_factor = args.cl_growth
         
         self.use_refine = args.use_refine
     def forward(self, data):

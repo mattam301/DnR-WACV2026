@@ -1,0 +1,962 @@
+{
+  "mosi_coid|simple|atv|baseline": {
+    "dataset": "mosi_coid",
+    "backbone": "simple",
+    "modalities": "atv",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 72.74,
+    "wf1_pct": 72.95,
+    "acc_raw": [
+      0.7274052478134111
+    ],
+    "f1_raw": [
+      0.7295455391589134
+    ]
+  },
+  "mosi_coid|simple|atv|dnr": {
+    "dataset": "mosi_coid",
+    "backbone": "simple",
+    "modalities": "atv",
+    "method": "dnr",
+    "runs": 1,
+    "acc_pct": 73.18,
+    "wf1_pct": 73.32,
+    "acc_raw": [
+      0.7317784256559767
+    ],
+    "f1_raw": [
+      0.7331941331210637
+    ]
+  },
+  "mosi_coid|simple|av|baseline": {
+    "dataset": "mosi_coid",
+    "backbone": "simple",
+    "modalities": "av",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 40.38,
+    "wf1_pct": 23.23,
+    "acc_raw": [
+      0.4037900874635568
+    ],
+    "f1_raw": [
+      0.23229460898734217
+    ]
+  },
+  "mosi_coid|simple|av|dnr": {
+    "dataset": "mosi_coid",
+    "backbone": "simple",
+    "modalities": "av",
+    "method": "dnr",
+    "runs": 1,
+    "acc_pct": 71.28,
+    "wf1_pct": 71.22,
+    "acc_raw": [
+      0.7128279883381924
+    ],
+    "f1_raw": [
+      0.7122088129632062
+    ]
+  },
+  "mosi_coid|simple|at|baseline": {
+    "dataset": "mosi_coid",
+    "backbone": "simple",
+    "modalities": "at",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 40.38,
+    "wf1_pct": 24.95,
+    "acc_raw": [
+      0.4037900874635568
+    ],
+    "f1_raw": [
+      0.24949735985966276
+    ]
+  },
+  "mosi_coid|simple|at|dnr": {
+    "dataset": "mosi_coid",
+    "backbone": "simple",
+    "modalities": "at",
+    "method": "dnr",
+    "runs": 1,
+    "acc_pct": 71.57,
+    "wf1_pct": 71.82,
+    "acc_raw": [
+      0.7157434402332361
+    ],
+    "f1_raw": [
+      0.7182365477959243
+    ]
+  },
+  "mosi_coid|simple|tv|baseline": {
+    "dataset": "mosi_coid",
+    "backbone": "simple",
+    "modalities": "tv",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 74.78,
+    "wf1_pct": 74.79,
+    "acc_raw": [
+      0.7478134110787172
+    ],
+    "f1_raw": [
+      0.7478862692461473
+    ]
+  },
+  "mosi_coid|simple|tv|dnr": {
+    "dataset": "mosi_coid",
+    "backbone": "simple",
+    "modalities": "tv",
+    "method": "dnr",
+    "runs": 1,
+    "acc_pct": 73.18,
+    "wf1_pct": 73.31,
+    "acc_raw": [
+      0.7317784256559767
+    ],
+    "f1_raw": [
+      0.7330901027723971
+    ]
+  },
+  "mosi_coid|mmgcn|atv|baseline": {
+    "dataset": "mosi_coid",
+    "backbone": "mmgcn",
+    "modalities": "atv",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 72.74,
+    "wf1_pct": 72.95,
+    "acc_raw": [
+      0.7274052478134111
+    ],
+    "f1_raw": [
+      0.7295455391589134
+    ]
+  },
+  "mosi_coid|mmgcn|atv|dnr": {
+    "dataset": "mosi_coid",
+    "backbone": "mmgcn",
+    "modalities": "atv",
+    "method": "dnr",
+    "runs": 1,
+    "acc_pct": 73.18,
+    "wf1_pct": 73.32,
+    "acc_raw": [
+      0.7317784256559767
+    ],
+    "f1_raw": [
+      0.7331941331210637
+    ]
+  },
+  "mosi_coid|mmgcn|av|baseline": {
+    "dataset": "mosi_coid",
+    "backbone": "mmgcn",
+    "modalities": "av",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 40.38,
+    "wf1_pct": 23.23,
+    "acc_raw": [
+      0.4037900874635568
+    ],
+    "f1_raw": [
+      0.23229460898734217
+    ]
+  },
+  "mosi_coid|mmgcn|av|dnr": {
+    "dataset": "mosi_coid",
+    "backbone": "mmgcn",
+    "modalities": "av",
+    "method": "dnr",
+    "runs": 1,
+    "acc_pct": 71.28,
+    "wf1_pct": 71.22,
+    "acc_raw": [
+      0.7128279883381924
+    ],
+    "f1_raw": [
+      0.7122088129632062
+    ]
+  },
+  "mosi_coid|mmgcn|at|baseline": {
+    "dataset": "mosi_coid",
+    "backbone": "mmgcn",
+    "modalities": "at",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 40.38,
+    "wf1_pct": 24.95,
+    "acc_raw": [
+      0.4037900874635568
+    ],
+    "f1_raw": [
+      0.24949735985966276
+    ]
+  },
+  "mosi_coid|mmgcn|at|dnr": {
+    "dataset": "mosi_coid",
+    "backbone": "mmgcn",
+    "modalities": "at",
+    "method": "dnr",
+    "runs": 1,
+    "acc_pct": 71.57,
+    "wf1_pct": 71.82,
+    "acc_raw": [
+      0.7157434402332361
+    ],
+    "f1_raw": [
+      0.7182365477959243
+    ]
+  },
+  "mosi_coid|mmgcn|tv|baseline": {
+    "dataset": "mosi_coid",
+    "backbone": "mmgcn",
+    "modalities": "tv",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 74.78,
+    "wf1_pct": 74.79,
+    "acc_raw": [
+      0.7478134110787172
+    ],
+    "f1_raw": [
+      0.7478862692461473
+    ]
+  },
+  "mosi_coid|mmgcn|tv|dnr": {
+    "dataset": "mosi_coid",
+    "backbone": "mmgcn",
+    "modalities": "tv",
+    "method": "dnr",
+    "runs": 1,
+    "acc_pct": 73.18,
+    "wf1_pct": 73.31,
+    "acc_raw": [
+      0.7317784256559767
+    ],
+    "f1_raw": [
+      0.7330901027723971
+    ]
+  },
+  "mosi_coid|dialogue_gcn|atv|baseline": {
+    "dataset": "mosi_coid",
+    "backbone": "dialogue_gcn",
+    "modalities": "atv",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 72.74,
+    "wf1_pct": 72.95,
+    "acc_raw": [
+      0.7274052478134111
+    ],
+    "f1_raw": [
+      0.7295455391589134
+    ]
+  },
+  "mosi_coid|dialogue_gcn|atv|dnr": {
+    "dataset": "mosi_coid",
+    "backbone": "dialogue_gcn",
+    "modalities": "atv",
+    "method": "dnr",
+    "runs": 1,
+    "acc_pct": 73.18,
+    "wf1_pct": 73.32,
+    "acc_raw": [
+      0.7317784256559767
+    ],
+    "f1_raw": [
+      0.7331941331210637
+    ]
+  },
+  "mosi_coid|dialogue_gcn|av|baseline": {
+    "dataset": "mosi_coid",
+    "backbone": "dialogue_gcn",
+    "modalities": "av",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 40.38,
+    "wf1_pct": 23.23,
+    "acc_raw": [
+      0.4037900874635568
+    ],
+    "f1_raw": [
+      0.23229460898734217
+    ]
+  },
+  "mosi_coid|dialogue_gcn|av|dnr": {
+    "dataset": "mosi_coid",
+    "backbone": "dialogue_gcn",
+    "modalities": "av",
+    "method": "dnr",
+    "runs": 1,
+    "acc_pct": 71.28,
+    "wf1_pct": 71.22,
+    "acc_raw": [
+      0.7128279883381924
+    ],
+    "f1_raw": [
+      0.7122088129632062
+    ]
+  },
+  "mosi_coid|dialogue_gcn|at|baseline": {
+    "dataset": "mosi_coid",
+    "backbone": "dialogue_gcn",
+    "modalities": "at",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 40.38,
+    "wf1_pct": 24.95,
+    "acc_raw": [
+      0.4037900874635568
+    ],
+    "f1_raw": [
+      0.24949735985966276
+    ]
+  },
+  "mosi_coid|dialogue_gcn|at|dnr": {
+    "dataset": "mosi_coid",
+    "backbone": "dialogue_gcn",
+    "modalities": "at",
+    "method": "dnr",
+    "runs": 1,
+    "acc_pct": 71.57,
+    "wf1_pct": 71.82,
+    "acc_raw": [
+      0.7157434402332361
+    ],
+    "f1_raw": [
+      0.7182365477959243
+    ]
+  },
+  "mosi_coid|dialogue_gcn|tv|baseline": {
+    "dataset": "mosi_coid",
+    "backbone": "dialogue_gcn",
+    "modalities": "tv",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 74.78,
+    "wf1_pct": 74.79,
+    "acc_raw": [
+      0.7478134110787172
+    ],
+    "f1_raw": [
+      0.7478862692461473
+    ]
+  },
+  "mosi_coid|dialogue_gcn|tv|dnr": {
+    "dataset": "mosi_coid",
+    "backbone": "dialogue_gcn",
+    "modalities": "tv",
+    "method": "dnr",
+    "runs": 1,
+    "acc_pct": 73.18,
+    "wf1_pct": 73.31,
+    "acc_raw": [
+      0.7317784256559767
+    ],
+    "f1_raw": [
+      0.7330901027723971
+    ]
+  },
+  "mosi_coid|mm_dfn|atv|baseline": {
+    "dataset": "mosi_coid",
+    "backbone": "mm_dfn",
+    "modalities": "atv",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 72.74,
+    "wf1_pct": 72.95,
+    "acc_raw": [
+      0.7274052478134111
+    ],
+    "f1_raw": [
+      0.7295455391589134
+    ]
+  },
+  "mosi_coid|mm_dfn|atv|dnr": {
+    "dataset": "mosi_coid",
+    "backbone": "mm_dfn",
+    "modalities": "atv",
+    "method": "dnr",
+    "runs": 1,
+    "acc_pct": 73.18,
+    "wf1_pct": 73.32,
+    "acc_raw": [
+      0.7317784256559767
+    ],
+    "f1_raw": [
+      0.7331941331210637
+    ]
+  },
+  "mosi_coid|mm_dfn|av|baseline": {
+    "dataset": "mosi_coid",
+    "backbone": "mm_dfn",
+    "modalities": "av",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 40.38,
+    "wf1_pct": 23.23,
+    "acc_raw": [
+      0.4037900874635568
+    ],
+    "f1_raw": [
+      0.23229460898734217
+    ]
+  },
+  "mosi_coid|mm_dfn|av|dnr": {
+    "dataset": "mosi_coid",
+    "backbone": "mm_dfn",
+    "modalities": "av",
+    "method": "dnr",
+    "runs": 1,
+    "acc_pct": 71.28,
+    "wf1_pct": 71.22,
+    "acc_raw": [
+      0.7128279883381924
+    ],
+    "f1_raw": [
+      0.7122088129632062
+    ]
+  },
+  "mosi_coid|mm_dfn|at|baseline": {
+    "dataset": "mosi_coid",
+    "backbone": "mm_dfn",
+    "modalities": "at",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 40.38,
+    "wf1_pct": 24.95,
+    "acc_raw": [
+      0.4037900874635568
+    ],
+    "f1_raw": [
+      0.24949735985966276
+    ]
+  },
+  "mosi_coid|mm_dfn|at|dnr": {
+    "dataset": "mosi_coid",
+    "backbone": "mm_dfn",
+    "modalities": "at",
+    "method": "dnr",
+    "runs": 1,
+    "acc_pct": 71.57,
+    "wf1_pct": 71.82,
+    "acc_raw": [
+      0.7157434402332361
+    ],
+    "f1_raw": [
+      0.7182365477959243
+    ]
+  },
+  "mosi_coid|mm_dfn|tv|baseline": {
+    "dataset": "mosi_coid",
+    "backbone": "mm_dfn",
+    "modalities": "tv",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 74.78,
+    "wf1_pct": 74.79,
+    "acc_raw": [
+      0.7478134110787172
+    ],
+    "f1_raw": [
+      0.7478862692461473
+    ]
+  },
+  "mosi_coid|mm_dfn|tv|dnr": {
+    "dataset": "mosi_coid",
+    "backbone": "mm_dfn",
+    "modalities": "tv",
+    "method": "dnr",
+    "runs": 1,
+    "acc_pct": 73.18,
+    "wf1_pct": 73.31,
+    "acc_raw": [
+      0.7317784256559767
+    ],
+    "f1_raw": [
+      0.7330901027723971
+    ]
+  },
+  "mosei_coid|simple|atv|baseline": {
+    "dataset": "mosei_coid",
+    "backbone": "simple",
+    "modalities": "atv",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 51.0,
+    "wf1_pct": 34.45,
+    "acc_raw": [
+      0.5100150764591859
+    ],
+    "f1_raw": [
+      0.344520239924505
+    ]
+  },
+  "mosei_coid|simple|atv|dnr": {
+    "dataset": "mosei_coid",
+    "backbone": "simple",
+    "modalities": "atv",
+    "method": "dnr",
+    "runs": 1,
+    "acc_pct": 0.0,
+    "wf1_pct": 0.0,
+    "acc_raw": [
+      0.0
+    ],
+    "f1_raw": [
+      0.0
+    ]
+  },
+  "mosei_coid|simple|av|baseline": {
+    "dataset": "mosei_coid",
+    "backbone": "simple",
+    "modalities": "av",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 51.0,
+    "wf1_pct": 34.45,
+    "acc_raw": [
+      0.5100150764591859
+    ],
+    "f1_raw": [
+      0.344520239924505
+    ]
+  },
+  "mosei_coid|simple|av|dnr": {
+    "dataset": "mosei_coid",
+    "backbone": "simple",
+    "modalities": "av",
+    "method": "dnr",
+    "runs": 1,
+    "acc_pct": 0.0,
+    "wf1_pct": 0.0,
+    "acc_raw": [
+      0.0
+    ],
+    "f1_raw": [
+      0.0
+    ]
+  },
+  "mosei_coid|simple|at|baseline": {
+    "dataset": "mosei_coid",
+    "backbone": "simple",
+    "modalities": "at",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 51.0,
+    "wf1_pct": 34.45,
+    "acc_raw": [
+      0.5100150764591859
+    ],
+    "f1_raw": [
+      0.344520239924505
+    ]
+  },
+  "mosei_coid|simple|at|dnr": {
+    "dataset": "mosei_coid",
+    "backbone": "simple",
+    "modalities": "at",
+    "method": "dnr",
+    "runs": 1,
+    "acc_pct": 0.0,
+    "wf1_pct": 0.0,
+    "acc_raw": [
+      0.0
+    ],
+    "f1_raw": [
+      0.0
+    ]
+  },
+  "mosei_coid|simple|tv|baseline": {
+    "dataset": "mosei_coid",
+    "backbone": "simple",
+    "modalities": "tv",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 72.3,
+    "wf1_pct": 72.29,
+    "acc_raw": [
+      0.723023906956709
+    ],
+    "f1_raw": [
+      0.7228742666182654
+    ]
+  },
+  "mosei_coid|simple|tv|dnr": {
+    "dataset": "mosei_coid",
+    "backbone": "simple",
+    "modalities": "tv",
+    "method": "dnr",
+    "runs": 1,
+    "acc_pct": 0.0,
+    "wf1_pct": 0.0,
+    "acc_raw": [
+      0.0
+    ],
+    "f1_raw": [
+      0.0
+    ]
+  },
+  "mosei_coid|mmgcn|atv|baseline": {
+    "dataset": "mosei_coid",
+    "backbone": "mmgcn",
+    "modalities": "atv",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 51.0,
+    "wf1_pct": 34.45,
+    "acc_raw": [
+      0.5100150764591859
+    ],
+    "f1_raw": [
+      0.344520239924505
+    ]
+  },
+  "mosei_coid|mmgcn|atv|dnr": {
+    "dataset": "mosei_coid",
+    "backbone": "mmgcn",
+    "modalities": "atv",
+    "method": "dnr",
+    "runs": 1,
+    "acc_pct": 0.0,
+    "wf1_pct": 0.0,
+    "acc_raw": [
+      0.0
+    ],
+    "f1_raw": [
+      0.0
+    ]
+  },
+  "mosei_coid|mmgcn|av|baseline": {
+    "dataset": "mosei_coid",
+    "backbone": "mmgcn",
+    "modalities": "av",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 51.0,
+    "wf1_pct": 34.45,
+    "acc_raw": [
+      0.5100150764591859
+    ],
+    "f1_raw": [
+      0.344520239924505
+    ]
+  },
+  "mosei_coid|mmgcn|av|dnr": {
+    "dataset": "mosei_coid",
+    "backbone": "mmgcn",
+    "modalities": "av",
+    "method": "dnr",
+    "runs": 1,
+    "acc_pct": 0.0,
+    "wf1_pct": 0.0,
+    "acc_raw": [
+      0.0
+    ],
+    "f1_raw": [
+      0.0
+    ]
+  },
+  "mosei_coid|mmgcn|at|baseline": {
+    "dataset": "mosei_coid",
+    "backbone": "mmgcn",
+    "modalities": "at",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 51.0,
+    "wf1_pct": 34.45,
+    "acc_raw": [
+      0.5100150764591859
+    ],
+    "f1_raw": [
+      0.344520239924505
+    ]
+  },
+  "mosei_coid|mmgcn|at|dnr": {
+    "dataset": "mosei_coid",
+    "backbone": "mmgcn",
+    "modalities": "at",
+    "method": "dnr",
+    "runs": 1,
+    "acc_pct": 0.0,
+    "wf1_pct": 0.0,
+    "acc_raw": [
+      0.0
+    ],
+    "f1_raw": [
+      0.0
+    ]
+  },
+  "mosei_coid|mmgcn|tv|baseline": {
+    "dataset": "mosei_coid",
+    "backbone": "mmgcn",
+    "modalities": "tv",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 72.3,
+    "wf1_pct": 72.29,
+    "acc_raw": [
+      0.723023906956709
+    ],
+    "f1_raw": [
+      0.7228742666182654
+    ]
+  },
+  "mosei_coid|mmgcn|tv|dnr": {
+    "dataset": "mosei_coid",
+    "backbone": "mmgcn",
+    "modalities": "tv",
+    "method": "dnr",
+    "runs": 1,
+    "acc_pct": 0.0,
+    "wf1_pct": 0.0,
+    "acc_raw": [
+      0.0
+    ],
+    "f1_raw": [
+      0.0
+    ]
+  },
+  "mosei_coid|dialogue_gcn|atv|baseline": {
+    "dataset": "mosei_coid",
+    "backbone": "dialogue_gcn",
+    "modalities": "atv",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 51.0,
+    "wf1_pct": 34.45,
+    "acc_raw": [
+      0.5100150764591859
+    ],
+    "f1_raw": [
+      0.344520239924505
+    ]
+  },
+  "mosei_coid|dialogue_gcn|atv|dnr": {
+    "dataset": "mosei_coid",
+    "backbone": "dialogue_gcn",
+    "modalities": "atv",
+    "method": "dnr",
+    "runs": 1,
+    "acc_pct": 0.0,
+    "wf1_pct": 0.0,
+    "acc_raw": [
+      0.0
+    ],
+    "f1_raw": [
+      0.0
+    ]
+  },
+  "mosei_coid|dialogue_gcn|av|baseline": {
+    "dataset": "mosei_coid",
+    "backbone": "dialogue_gcn",
+    "modalities": "av",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 51.0,
+    "wf1_pct": 34.45,
+    "acc_raw": [
+      0.5100150764591859
+    ],
+    "f1_raw": [
+      0.344520239924505
+    ]
+  },
+  "mosei_coid|dialogue_gcn|av|dnr": {
+    "dataset": "mosei_coid",
+    "backbone": "dialogue_gcn",
+    "modalities": "av",
+    "method": "dnr",
+    "runs": 1,
+    "acc_pct": 0.0,
+    "wf1_pct": 0.0,
+    "acc_raw": [
+      0.0
+    ],
+    "f1_raw": [
+      0.0
+    ]
+  },
+  "mosei_coid|dialogue_gcn|at|baseline": {
+    "dataset": "mosei_coid",
+    "backbone": "dialogue_gcn",
+    "modalities": "at",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 51.0,
+    "wf1_pct": 34.45,
+    "acc_raw": [
+      0.5100150764591859
+    ],
+    "f1_raw": [
+      0.344520239924505
+    ]
+  },
+  "mosei_coid|dialogue_gcn|at|dnr": {
+    "dataset": "mosei_coid",
+    "backbone": "dialogue_gcn",
+    "modalities": "at",
+    "method": "dnr",
+    "runs": 1,
+    "acc_pct": 0.0,
+    "wf1_pct": 0.0,
+    "acc_raw": [
+      0.0
+    ],
+    "f1_raw": [
+      0.0
+    ]
+  },
+  "mosei_coid|dialogue_gcn|tv|baseline": {
+    "dataset": "mosei_coid",
+    "backbone": "dialogue_gcn",
+    "modalities": "tv",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 72.3,
+    "wf1_pct": 72.29,
+    "acc_raw": [
+      0.723023906956709
+    ],
+    "f1_raw": [
+      0.7228742666182654
+    ]
+  },
+  "mosei_coid|dialogue_gcn|tv|dnr": {
+    "dataset": "mosei_coid",
+    "backbone": "dialogue_gcn",
+    "modalities": "tv",
+    "method": "dnr",
+    "runs": 1,
+    "acc_pct": 0.0,
+    "wf1_pct": 0.0,
+    "acc_raw": [
+      0.0
+    ],
+    "f1_raw": [
+      0.0
+    ]
+  },
+  "mosei_coid|mm_dfn|atv|baseline": {
+    "dataset": "mosei_coid",
+    "backbone": "mm_dfn",
+    "modalities": "atv",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 51.0,
+    "wf1_pct": 34.45,
+    "acc_raw": [
+      0.5100150764591859
+    ],
+    "f1_raw": [
+      0.344520239924505
+    ]
+  },
+  "mosei_coid|mm_dfn|atv|dnr": {
+    "dataset": "mosei_coid",
+    "backbone": "mm_dfn",
+    "modalities": "atv",
+    "method": "dnr",
+    "runs": 1,
+    "acc_pct": 0.0,
+    "wf1_pct": 0.0,
+    "acc_raw": [
+      0.0
+    ],
+    "f1_raw": [
+      0.0
+    ]
+  },
+  "mosei_coid|mm_dfn|av|baseline": {
+    "dataset": "mosei_coid",
+    "backbone": "mm_dfn",
+    "modalities": "av",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 51.0,
+    "wf1_pct": 34.45,
+    "acc_raw": [
+      0.5100150764591859
+    ],
+    "f1_raw": [
+      0.344520239924505
+    ]
+  },
+  "mosei_coid|mm_dfn|av|dnr": {
+    "dataset": "mosei_coid",
+    "backbone": "mm_dfn",
+    "modalities": "av",
+    "method": "dnr",
+    "runs": 1,
+    "acc_pct": 0.0,
+    "wf1_pct": 0.0,
+    "acc_raw": [
+      0.0
+    ],
+    "f1_raw": [
+      0.0
+    ]
+  },
+  "mosei_coid|mm_dfn|at|baseline": {
+    "dataset": "mosei_coid",
+    "backbone": "mm_dfn",
+    "modalities": "at",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 51.0,
+    "wf1_pct": 34.45,
+    "acc_raw": [
+      0.5100150764591859
+    ],
+    "f1_raw": [
+      0.344520239924505
+    ]
+  },
+  "mosei_coid|mm_dfn|at|dnr": {
+    "dataset": "mosei_coid",
+    "backbone": "mm_dfn",
+    "modalities": "at",
+    "method": "dnr",
+    "runs": 1,
+    "acc_pct": 0.0,
+    "wf1_pct": 0.0,
+    "acc_raw": [
+      0.0
+    ],
+    "f1_raw": [
+      0.0
+    ]
+  },
+  "mosei_coid|mm_dfn|tv|baseline": {
+    "dataset": "mosei_coid",
+    "backbone": "mm_dfn",
+    "modalities": "tv",
+    "method": "baseline",
+    "runs": 1,
+    "acc_pct": 72.3,
+    "wf1_pct": 72.29,
+    "acc_raw": [
+      0.723023906956709
+    ],
+    "f1_raw": [
+      0.7228742666182654
+    ]
+  },
+  "mosei_coid|mm_dfn|tv|dnr": {
+    "dataset": "mosei_coid",
+    "backbone": "mm_dfn",
+    "modalities": "tv",
+    "method": "dnr",
+    "runs": 1,
+    "acc_pct": 0.0,
+    "wf1_pct": 0.0,
+    "acc_raw": [
+      0.0
+    ],
+    "f1_raw": [
+      0.0
+    ]
+  }
+}

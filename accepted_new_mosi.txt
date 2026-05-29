@@ -1,0 +1,330 @@
+Namespace(comet=False, comet_api='', comet_workspace='', project_name='dnr_affect', name='dnr_mosi_coid_run1', dataset='mosi_coid', emotion=None, devset_ratio=0.1, backbone='mmgcn', modalities='atv', data_dir_path='data', seed=50, optimizer='adam', scheduler='reduceLR', learning_rate=0.0005, weight_decay=1e-08, early_stopping=20, batch_size=32, epochs=60, device='cuda', modulation=False, alpha=0.5, normalize=False, grad_clipping=False, grad_norm=2.0, grad_norm_max=2.0, use_cl=False, regularizer='hard', cl_threshold=0.4, cl_growth=1.25, encoder_modules='transformer', encoder_nlayers=2, beta=0.7, hidden_dim=64, hidden2_dim=150, hidden3_dim=100, hidden4_dim=100, D_att=100, listener_state=False, context_attention='simple', drop_rate=0.5, trans_head=1, d_state=128, wp=2, wf=2, use_speaker=False, use_refine=False, use_divide=False, plot_smurf_decomp=False, use_hightway=False, divide_dim=256, pretrain_epochs=400, run_kld_analysis=False, analysis_dir='analysis_outputs', analysis_tau=1.0, lambda_syn=0.5, lambda_masked=0.5, lambda_guard=0.5, smurf_syn_lr_mult=3.0, input_embedding_dim={'iemocap': {'a': 512, 't': 768, 'v': 1024}, 'meld': {'a': 300, 't': 768, 'v': 342}, 'mosi': {'a': 5, 't': 300, 'v': 20}, 'mosei': {'a': 74, 't': 300, 'v': 35}, 'humor': {'a': 81, 't': 300, 'v': 371}, 'sarcasm': {'a': 81, 't': 300, 'v': 371}, 'iemocap_coid': {'a': 512, 't': 768, 'v': 1024}, 'meld_coid': {'a': 300, 't': 768, 'v': 342}, 'mosi_coid': {'a': 5, 't': 300, 'v': 20}, 'mosei_coid': {'a': 74, 't': 300, 'v': 35}, 'humor_coid': {'a': 81, 't': 300, 'v': 371}, 'sarcasm_coid': {'a': 81, 't': 300, 'v': 371}}, embedding_dim={'iemocap': {'a': 512, 't': 768, 'v': 1024}, 'meld': {'a': 300, 't': 768, 'v': 342}, 'mosi': {'a': 5, 't': 300, 'v': 20}, 'mosei': {'a': 74, 't': 300, 'v': 35}, 'humor': {'a': 81, 't': 300, 'v': 371}, 'sarcasm': {'a': 81, 't': 300, 'v': 371}, 'iemocap_coid': {'a': 512, 't': 768, 'v': 1024}, 'meld_coid': {'a': 300, 't': 768, 'v': 342}, 'mosi_coid': {'a': 5, 't': 300, 'v': 20}, 'mosei_coid': {'a': 74, 't': 300, 'v': 35}, 'humor_coid': {'a': 81, 't': 300, 'v': 371}, 'sarcasm_coid': {'a': 81, 't': 300, 'v': 371}}, dataset_label_dict={'iemocap': {'hap': 0, 'sad': 1, 'neu': 2, 'ang': 3, 'exc': 4, 'fru': 5}, 'iemocap_coid': {'hap': 0, 'sad': 1, 'neu': 2, 'ang': 3, 'exc': 4, 'fru': 5}, 'iemocap_4': {'hap': 0, 'sad': 1, 'neu': 2, 'ang': 3}, 'iemocap_4_coid': {'hap': 0, 'sad': 1, 'neu': 2, 'ang': 3}, 'meld': {'neu': 0, 'sup': 1, 'fea': 2, 'sad': 3, 'joy': 4, 'dis': 5, 'ang': 6}, 'meld_coid': {'neu': 0, 'sup': 1, 'fea': 2, 'sad': 3, 'joy': 4, 'dis': 5, 'ang': 6}, 'mosi': {'neg': 0, 'pos': 1}, 'mosi_coid': {'neg': 0, 'pos': 1}, 'mosei': {'neg': 0, 'pos': 1}, 'mosei_coid': {'neg': 0, 'pos': 1}, 'humor': {'not_humor': 0, 'humor': 1}, 'humor_coid': {'not_humor': 0, 'humor': 1}, 'sarcasm': {'not_sarcasm': 0, 'sarcasm': 1}, 'sarcasm_coid': {'not_sarcasm': 0, 'sarcasm': 1}, 'mosei7': {'Strong Negative': 0, 'Weak Negative': 1, 'Negative': 2, 'Neutral': 3, 'Positive': 4, 'Weak Positive': 5, 'Strong Positive': 6}, 'mosei2': {'Negative': 0, 'Positive': 1}}, dataset_num_speakers={'iemocap': 2, 'iemocap_coid': 2, 'iemocap_4': 2, 'iemocap_4_coid': 2, 'mosei7': 1, 'mosei2': 1, 'mosi': 1, 'mosi_coid': 1, 'mosei': 1, 'mosei_coid': 1, 'humor': 1, 'humor_coid': 1, 'sarcasm': 1, 'sarcasm_coid': 1, 'meld': 8, 'meld_coid': 8})
+Seed set 50
+[Epoch 0] [Time: 13.972125768661499]
+Ratio a: 1.0426547527313232 Ratio t: 1.072282314300537 Ratio v: 1.0 
+[Dev Loss: 0.61320810765028]
+[Dev F1: 0.5898477457241171]
+[Dev Acc: 0.6200873362445415]
+[Epoch 1] [Time: 13.266089677810669]
+Ratio a: 1.072304129600525 Ratio t: 1.3999677896499634 Ratio v: 1.0 
+[Dev Loss: 0.5279947826638818]
+[Dev F1: 0.7275499779656264]
+[Dev Acc: 0.7292576419213974]
+[Epoch 2] [Time: 13.804112195968628]
+Ratio a: 1.0007271766662598 Ratio t: 1.4847265481948853 Ratio v: 1.0 
+[Dev Loss: 0.7500782608985901]
+[Dev F1: 0.5579802590578095]
+[Dev Acc: 0.62882096069869]
+[Epoch 3] [Time: 13.498895406723022]
+Ratio a: 1.3538671731948853 Ratio t: 1.0 Ratio v: 1.4048017263412476 
+[Dev Loss: 0.5754870008677244]
+[Dev F1: 0.6790623338284686]
+[Dev Acc: 0.6899563318777293]
+[Epoch 4] [Time: 13.46474838256836]
+Ratio a: 1.0 Ratio t: 1.0783172845840454 Ratio v: 1.1996386051177979 
+[Dev Loss: 0.5538098905235529]
+[Dev F1: 0.746406074892762]
+[Dev Acc: 0.7467248908296943]
+[Epoch 5] [Time: 13.501679420471191]
+Ratio a: 1.0119131803512573 Ratio t: 1.4859380722045898 Ratio v: 1.0 
+[Dev Loss: 0.5420952569693327]
+[Dev F1: 0.757701474535705]
+[Dev Acc: 0.759825327510917]
+[Epoch 6] [Time: 13.50680661201477]
+Ratio a: 1.0 Ratio t: 1.3694969415664673 Ratio v: 1.065525770187378 
+[Dev Loss: 0.5500717423856258]
+[Dev F1: 0.7221646147030616]
+[Dev Acc: 0.7292576419213974]
+[Epoch 7] [Time: 13.742038488388062]
+Ratio a: 1.0 Ratio t: 1.8647948503494263 Ratio v: 1.0117310285568237 
+[Dev Loss: 0.5345567632466555]
+[Dev F1: 0.7390656880265958]
+[Dev Acc: 0.74235807860262]
+[Epoch 8] [Time: 13.506112337112427]
+Ratio a: 1.0092686414718628 Ratio t: 1.1356816291809082 Ratio v: 1.0 
+[Dev Loss: 0.5020550871267915]
+[Dev F1: 0.7365348187159219]
+[Dev Acc: 0.74235807860262]
+[Epoch 9] [Time: 13.255630493164062]
+Ratio a: 1.0 Ratio t: 1.169019341468811 Ratio v: 1.0242242813110352 
+[Dev Loss: 0.4687282834202051]
+[Dev F1: 0.7678964930927205]
+[Dev Acc: 0.7685589519650655]
+[Epoch 10] [Time: 13.266680240631104]
+Ratio a: 1.0041147470474243 Ratio t: 1.5284260511398315 Ratio v: 1.0 
+[Dev Loss: 0.48011175729334354]
+[Dev F1: 0.7775909689859793]
+[Dev Acc: 0.777292576419214]
+[Epoch 11] [Time: 13.329248189926147]
+Ratio a: 1.0 Ratio t: 1.632566213607788 Ratio v: 1.098097801208496 
+[Dev Loss: 0.703523576259613]
+[Dev F1: 0.7319108510641246]
+[Dev Acc: 0.7379912663755459]
+[Epoch 12] [Time: 13.471784114837646]
+Ratio a: 1.153633713722229 Ratio t: 1.1091943979263306 Ratio v: 1.0 
+[Dev Loss: 0.5492235533893108]
+[Dev F1: 0.7554585152838428]
+[Dev Acc: 0.7554585152838428]
+[Epoch 13] [Time: 13.299348592758179]
+Ratio a: 1.0 Ratio t: 1.7014142274856567 Ratio v: 1.0711308717727661 
+[Dev Loss: 0.5544850341975689]
+[Dev F1: 0.7375269266565319]
+[Dev Acc: 0.7379912663755459]
+[Epoch 14] [Time: 13.337111473083496]
+Ratio a: 1.0 Ratio t: 1.6131998300552368 Ratio v: 1.142227292060852 
+[Dev Loss: 0.5738046318292618]
+[Dev F1: 0.7359995834933196]
+[Dev Acc: 0.74235807860262]
+[Epoch 15] [Time: 13.583831787109375]
+Ratio a: 1.0 Ratio t: 1.1226004362106323 Ratio v: 1.172083854675293 
+[Dev Loss: 0.534521883353591]
+[Dev F1: 0.7471508887197361]
+[Dev Acc: 0.7467248908296943]
+[Epoch 16] [Time: 12.620067358016968]
+Ratio a: 1.2759721279144287 Ratio t: 1.814348578453064 Ratio v: 1.0 
+[Dev Loss: 0.6715518236160278]
+[Dev F1: 0.7337164540683697]
+[Dev Acc: 0.7336244541484717]
+[Epoch 17] [Time: 12.813652515411377]
+Ratio a: 1.0 Ratio t: 1.320523977279663 Ratio v: 1.3969513177871704 
+[Dev Loss: 0.5360533073544502]
+[Dev F1: 0.7557850931213377]
+[Dev Acc: 0.7554585152838428]
+[Epoch 18] [Time: 12.415900230407715]
+Ratio a: 1.0 Ratio t: 1.7152467966079712 Ratio v: 1.0653131008148193 
+[Dev Loss: 0.6861574426293373]
+[Dev F1: 0.7439555597391098]
+[Dev Acc: 0.7467248908296943]
+[Epoch 19] [Time: 12.67379903793335]
+Ratio a: 1.0 Ratio t: 1.4136439561843872 Ratio v: 1.0312532186508179 
+[Dev Loss: 0.5749061182141304]
+[Dev F1: 0.7402735727134917]
+[Dev Acc: 0.74235807860262]
+[Epoch 20] [Time: 12.64087200164795]
+Ratio a: 1.0 Ratio t: 1.2327508926391602 Ratio v: 1.2038860321044922 
+[Dev Loss: 0.5130460150539875]
+[Dev F1: 0.7456669657140387]
+[Dev Acc: 0.7467248908296943]
+[Epoch 21] [Time: 12.635920763015747]
+Ratio a: 1.0 Ratio t: 1.061710000038147 Ratio v: 1.109224557876587 
+[Dev Loss: 0.5559562370181084]
+[Dev F1: 0.7471028265986583]
+[Dev Acc: 0.7467248908296943]
+[Epoch 22] [Time: 12.705467939376831]
+Ratio a: 1.0 Ratio t: 1.285085916519165 Ratio v: 1.0112252235412598 
+[Dev Loss: 0.5374292470514774]
+[Dev F1: 0.7505158041724884]
+[Dev Acc: 0.7510917030567685]
+[Epoch 23] [Time: 12.633466482162476]
+Ratio a: 1.0 Ratio t: 1.4352593421936035 Ratio v: 1.2470066547393799 
+[Dev Loss: 0.4906613156199455]
+[Dev F1: 0.7295054988253449]
+[Dev Acc: 0.7292576419213974]
+[Epoch 24] [Time: 12.664056777954102]
+Ratio a: 1.0 Ratio t: 1.0526142120361328 Ratio v: 1.2999088764190674 
+[Dev Loss: 0.5411482341587543]
+[Dev F1: 0.7196467256922061]
+[Dev Acc: 0.7248908296943232]
+[Epoch 25] [Time: 12.889827728271484]
+Ratio a: 1.0 Ratio t: 1.5527222156524658 Ratio v: 1.1607168912887573 
+[Dev Loss: 0.6208738088607788]
+[Dev F1: 0.7082182568117371]
+[Dev Acc: 0.7205240174672489]
+[Epoch 26] [Time: 12.713267087936401]
+Ratio a: 1.0271135568618774 Ratio t: 1.1675220727920532 Ratio v: 1.0 
+[Dev Loss: 0.6625090688467026]
+[Dev F1: 0.7407084824740792]
+[Dev Acc: 0.74235807860262]
+[Epoch 27] [Time: 12.553704261779785]
+Ratio a: 1.5032421350479126 Ratio t: 2.580829620361328 Ratio v: 1.0 
+[Dev Loss: 0.5985281839966774]
+[Dev F1: 0.7372327881054427]
+[Dev Acc: 0.7379912663755459]
+[Epoch 28] [Time: 12.471885442733765]
+Ratio a: 1.0 Ratio t: 1.014648199081421 Ratio v: 1.1417720317840576 
+[Dev Loss: 0.5057524144649506]
+[Dev F1: 0.7392751407612829]
+[Dev Acc: 0.74235807860262]
+[Epoch 29] [Time: 12.61557912826538]
+Ratio a: 1.0 Ratio t: 1.2486954927444458 Ratio v: 1.2286977767944336 
+[Dev Loss: 0.649617999792099]
+[Dev F1: 0.749077858384221]
+[Dev Acc: 0.7510917030567685]
+[Epoch 30] [Time: 12.693824529647827]
+Ratio a: 1.0 Ratio t: 2.043546438217163 Ratio v: 1.088254451751709 
+[Dev Loss: 0.6777284406125546]
+[Dev F1: 0.7547506022317464]
+[Dev Acc: 0.7554585152838428]
+Early stopping at epoch: 31
+Best model at epoch: 10
+Best dev F1: 0.7775909689859793
+              precision    recall  f1-score   support
+
+         neg     0.7833    0.7775    0.7804       409
+         pos     0.6750    0.6823    0.6786       277
+
+    accuracy                         0.7391       686
+   macro avg     0.7291    0.7299    0.7295       686
+weighted avg     0.7395    0.7391    0.7393       686
+
+Best test F1: 0.7392895026616252
+Best test Acc: 0.739067055393586
+Namespace(comet=False, comet_api='', comet_workspace='', project_name='dnr_affect', name='dnr_mosi_coid_run1', dataset='mosi_coid', emotion=None, devset_ratio=0.1, backbone='mmgcn', modalities='atv', data_dir_path='data', seed=50, optimizer='adam', scheduler='reduceLR', learning_rate=0.0005, weight_decay=1e-08, early_stopping=20, batch_size=32, epochs=60, device='cuda', modulation=False, alpha=0.5, normalize=False, grad_clipping=False, grad_norm=2.0, grad_norm_max=2.0, use_cl=False, regularizer='hard', cl_threshold=0.4, cl_growth=1.25, encoder_modules='transformer', encoder_nlayers=2, beta=0.7, hidden_dim=64, hidden2_dim=150, hidden3_dim=100, hidden4_dim=100, D_att=100, listener_state=False, context_attention='simple', drop_rate=0.5, trans_head=1, d_state=128, wp=2, wf=2, use_speaker=False, use_refine=True, use_divide=True, plot_smurf_decomp=False, use_hightway=False, divide_dim=256, pretrain_epochs=400, run_kld_analysis=False, analysis_dir='analysis_outputs', analysis_tau=1.0, lambda_syn=0.5, lambda_masked=0.5, lambda_guard=0.5, smurf_syn_lr_mult=3.0, input_embedding_dim={'iemocap': {'a': 512, 't': 768, 'v': 1024}, 'meld': {'a': 300, 't': 768, 'v': 342}, 'mosi': {'a': 5, 't': 300, 'v': 20}, 'mosei': {'a': 74, 't': 300, 'v': 35}, 'humor': {'a': 81, 't': 300, 'v': 371}, 'sarcasm': {'a': 81, 't': 300, 'v': 371}, 'iemocap_coid': {'a': 512, 't': 768, 'v': 1024}, 'meld_coid': {'a': 300, 't': 768, 'v': 342}, 'mosi_coid': {'a': 5, 't': 300, 'v': 20}, 'mosei_coid': {'a': 74, 't': 300, 'v': 35}, 'humor_coid': {'a': 81, 't': 300, 'v': 371}, 'sarcasm_coid': {'a': 81, 't': 300, 'v': 371}}, embedding_dim={'iemocap': {'a': 768, 't': 768, 'v': 768}, 'meld': {'a': 768, 't': 768, 'v': 768}, 'mosi': {'a': 768, 't': 768, 'v': 768}, 'mosei': {'a': 768, 't': 768, 'v': 768}, 'humor': {'a': 768, 't': 768, 'v': 768}, 'sarcasm': {'a': 768, 't': 768, 'v': 768}, 'iemocap_coid': {'a': 768, 't': 768, 'v': 768}, 'meld_coid': {'a': 768, 't': 768, 'v': 768}, 'mosi_coid': {'a': 768, 't': 768, 'v': 768}, 'mosei_coid': {'a': 768, 't': 768, 'v': 768}, 'humor_coid': {'a': 768, 't': 768, 'v': 768}, 'sarcasm_coid': {'a': 768, 't': 768, 'v': 768}}, dataset_label_dict={'iemocap': {'hap': 0, 'sad': 1, 'neu': 2, 'ang': 3, 'exc': 4, 'fru': 5}, 'iemocap_coid': {'hap': 0, 'sad': 1, 'neu': 2, 'ang': 3, 'exc': 4, 'fru': 5}, 'iemocap_4': {'hap': 0, 'sad': 1, 'neu': 2, 'ang': 3}, 'iemocap_4_coid': {'hap': 0, 'sad': 1, 'neu': 2, 'ang': 3}, 'meld': {'neu': 0, 'sup': 1, 'fea': 2, 'sad': 3, 'joy': 4, 'dis': 5, 'ang': 6}, 'meld_coid': {'neu': 0, 'sup': 1, 'fea': 2, 'sad': 3, 'joy': 4, 'dis': 5, 'ang': 6}, 'mosi': {'neg': 0, 'pos': 1}, 'mosi_coid': {'neg': 0, 'pos': 1}, 'mosei': {'neg': 0, 'pos': 1}, 'mosei_coid': {'neg': 0, 'pos': 1}, 'humor': {'not_humor': 0, 'humor': 1}, 'humor_coid': {'not_humor': 0, 'humor': 1}, 'sarcasm': {'not_sarcasm': 0, 'sarcasm': 1}, 'sarcasm_coid': {'not_sarcasm': 0, 'sarcasm': 1}, 'mosei7': {'Strong Negative': 0, 'Weak Negative': 1, 'Negative': 2, 'Neutral': 3, 'Positive': 4, 'Weak Positive': 5, 'Strong Positive': 6}, 'mosei2': {'Negative': 0, 'Positive': 1}}, dataset_num_speakers={'iemocap': 2, 'iemocap_coid': 2, 'iemocap_4': 2, 'iemocap_4_coid': 2, 'mosei7': 1, 'mosei2': 1, 'mosi': 1, 'mosi_coid': 1, 'mosei': 1, 'mosei_coid': 1, 'humor': 1, 'humor_coid': 1, 'sarcasm': 1, 'sarcasm_coid': 1, 'meld': 8, 'meld_coid': 8})
+Seed set 50
+Pretraining SMURF module...
+SMURF module pretrained.
+✅ SMURF pretrained model saved to smurf_pretrained.pt
+[Epoch 0] [Time: 98.7797281742096]
+Ratio a: 1.0 Ratio t: 1.2659597396850586 Ratio v: 1.3733346462249756 
+[Dev Loss: 0.9704420194029808]
+[Dev F1: 0.7209721008107507]
+[Dev Acc: 0.7205240174672489]
+[Epoch 1] [Time: 107.47468733787537]
+Ratio a: 1.032828450202942 Ratio t: 1.7815892696380615 Ratio v: 1.0 
+[Dev Loss: 1.044643983244896]
+[Dev F1: 0.7157966450759206]
+[Dev Acc: 0.7161572052401747]
+[Epoch 2] [Time: 101.83937311172485]
+Ratio a: 1.0 Ratio t: 1.917254090309143 Ratio v: 1.692579984664917 
+[Dev Loss: 1.0118952579796314]
+[Dev F1: 0.6015735294519381]
+[Dev Acc: 0.6375545851528385]
+[Epoch 3] [Time: 107.99350166320801]
+Ratio a: 1.0445247888565063 Ratio t: 2.0270872116088867 Ratio v: 1.0 
+[Dev Loss: 0.8626338839530945]
+[Dev F1: 0.6888912976899598]
+[Dev Acc: 0.6943231441048034]
+[Epoch 4] [Time: 104.44857931137085]
+Ratio a: 1.307982325553894 Ratio t: 1.0 Ratio v: 1.5465143918991089 
+[Dev Loss: 0.9500539973378181]
+[Dev F1: 0.7122204578536456]
+[Dev Acc: 0.7117903930131004]
+[Epoch 5] [Time: 108.10602402687073]
+Ratio a: 1.0 Ratio t: 1.194749116897583 Ratio v: 1.1685857772827148 
+[Dev Loss: 0.8585612326860428]
+[Dev F1: 0.6872293262414787]
+[Dev Acc: 0.6943231441048034]
+[Epoch 6] [Time: 107.75524473190308]
+Ratio a: 1.0 Ratio t: 1.4775391817092896 Ratio v: 1.2675617933273315 
+[Dev Loss: 0.8239629119634628]
+[Dev F1: 0.7059962958557762]
+[Dev Acc: 0.7074235807860262]
+[Epoch 7] [Time: 108.92801237106323]
+Ratio a: 1.8804337978363037 Ratio t: 2.849094867706299 Ratio v: 1.0 
+[Dev Loss: 0.8187278732657433]
+[Dev F1: 0.7253003042727764]
+[Dev Acc: 0.7248908296943232]
+[Epoch 8] [Time: 107.4967052936554]
+Ratio a: 1.0367450714111328 Ratio t: 1.5340148210525513 Ratio v: 1.0 
+[Dev Loss: 0.9109932854771614]
+[Dev F1: 0.6859508002700238]
+[Dev Acc: 0.6855895196506551]
+[Epoch 9] [Time: 108.03383088111877]
+Ratio a: 1.0825265645980835 Ratio t: 1.6838716268539429 Ratio v: 1.0 
+[Dev Loss: 0.9655175879597664]
+[Dev F1: 0.6807733339736619]
+[Dev Acc: 0.6855895196506551]
+[Epoch 10] [Time: 106.94659519195557]
+Ratio a: 1.1013511419296265 Ratio t: 1.7106969356536865 Ratio v: 1.0 
+[Dev Loss: 0.7735654264688492]
+[Dev F1: 0.6950844866530255]
+[Dev Acc: 0.6986899563318777]
+[Epoch 11] [Time: 109.42415308952332]
+Ratio a: 1.0 Ratio t: 1.9325248003005981 Ratio v: 1.2150495052337646 
+[Dev Loss: 1.1557588055729866]
+[Dev F1: 0.7080320205535673]
+[Dev Acc: 0.7117903930131004]
+[Epoch 12] [Time: 107.64015054702759]
+Ratio a: 1.8071082830429077 Ratio t: 3.070885419845581 Ratio v: 1.0 
+[Dev Loss: 1.0384766906499863]
+[Dev F1: 0.6524406917295725]
+[Dev Acc: 0.6593886462882096]
+[Epoch 13] [Time: 109.07662653923035]
+Ratio a: 1.0 Ratio t: 1.9443390369415283 Ratio v: 1.318851351737976 
+[Dev Loss: 1.0665787160396576]
+[Dev F1: 0.6903369914962076]
+[Dev Acc: 0.6943231441048034]
+[Epoch 14] [Time: 107.79067516326904]
+Ratio a: 1.0 Ratio t: 1.8684076070785522 Ratio v: 1.1660038232803345 
+[Dev Loss: 0.8563192784786224]
+[Dev F1: 0.6896407413632824]
+[Dev Acc: 0.6943231441048034]
+[Epoch 15] [Time: 108.23085379600525]
+Ratio a: 1.0 Ratio t: 1.5750583410263062 Ratio v: 1.4453620910644531 
+[Dev Loss: 1.007395714521408]
+[Dev F1: 0.6895624892367748]
+[Dev Acc: 0.6899563318777293]
+[Epoch 16] [Time: 108.97511458396912]
+Ratio a: 1.417199969291687 Ratio t: 2.773066282272339 Ratio v: 1.0 
+[Dev Loss: 1.087436519563198]
+[Dev F1: 0.6827608539332263]
+[Dev Acc: 0.6855895196506551]
+[Epoch 17] [Time: 109.59564280509949]
+Ratio a: 1.0 Ratio t: 1.4970602989196777 Ratio v: 1.3210738897323608 
+[Dev Loss: 1.1003051102161407]
+[Dev F1: 0.6888662527200308]
+[Dev Acc: 0.6899563318777293]
+[Epoch 18] [Time: 107.2603816986084]
+Ratio a: 1.0098859071731567 Ratio t: 1.8576380014419556 Ratio v: 1.0 
+[Dev Loss: 0.8622678592801094]
+[Dev F1: 0.6685700941880713]
+[Dev Acc: 0.6724890829694323]
+[Epoch 19] [Time: 107.47688436508179]
+Ratio a: 1.0 Ratio t: 1.3380638360977173 Ratio v: 1.197082757949829 
+[Dev Loss: 1.2109790295362473]
+[Dev F1: 0.6842762333001859]
+[Dev Acc: 0.6855895196506551]
+[Epoch 20] [Time: 108.3052384853363]
+Ratio a: 1.0 Ratio t: 1.4899704456329346 Ratio v: 1.1336138248443604 
+[Dev Loss: 1.1760215237736702]
+[Dev F1: 0.6842762333001859]
+[Dev Acc: 0.6855895196506551]
+[Epoch 21] [Time: 108.02321195602417]
+Ratio a: 1.0104196071624756 Ratio t: 1.0 Ratio v: 1.008594274520874 
+[Dev Loss: 1.0809492394328117]
+[Dev F1: 0.6833175558066387]
+[Dev Acc: 0.6855895196506551]
+[Epoch 22] [Time: 107.30142855644226]
+Ratio a: 1.0 Ratio t: 1.9492021799087524 Ratio v: 1.3205195665359497 
+[Dev Loss: 1.0818834751844406]
+[Dev F1: 0.6772272113886355]
+[Dev Acc: 0.6768558951965066]
+[Epoch 23] [Time: 108.37389612197876]
+Ratio a: 1.1454617977142334 Ratio t: 1.7054710388183594 Ratio v: 1.0 
+[Dev Loss: 0.9643649384379387]
+[Dev F1: 0.685335572724219]
+[Dev Acc: 0.6855895196506551]
+[Epoch 24] [Time: 108.79215955734253]
+Ratio a: 1.0 Ratio t: 1.8542566299438477 Ratio v: 1.3190057277679443 
+[Dev Loss: 0.8810990378260612]
+[Dev F1: 0.6979928155772229]
+[Dev Acc: 0.6986899563318777]
+[Epoch 25] [Time: 108.35786414146423]
+Ratio a: 1.0 Ratio t: 1.504978895187378 Ratio v: 1.0010952949523926 
+[Dev Loss: 1.1796459183096886]
+[Dev F1: 0.6909808479609947]
+[Dev Acc: 0.6943231441048034]
+[Epoch 26] [Time: 107.37093210220337]
+Ratio a: 1.0412887334823608 Ratio t: 1.629451870918274 Ratio v: 1.0 
+[Dev Loss: 1.230728916823864]
+[Dev F1: 0.6693567163124203]
+[Dev Acc: 0.6768558951965066]
+[Epoch 27] [Time: 106.9789547920227]
+Ratio a: 1.0932557582855225 Ratio t: 2.3620598316192627 Ratio v: 1.0 
+[Dev Loss: 1.0106935054063797]
+[Dev F1: 0.6717313212795901]
+[Dev Acc: 0.6724890829694323]
+Early stopping at epoch: 28
+Best model at epoch: 7
+Best dev F1: 0.7253003042727764
+              precision    recall  f1-score   support
+
+         neg     0.7877    0.7800    0.7838       409
+         pos     0.6797    0.6895    0.6846       277
+
+    accuracy                         0.7434       686
+   macro avg     0.7337    0.7347    0.7342       686
+weighted avg     0.7441    0.7434    0.7437       686
+
+Best test F1: 0.743729434315346
+Best test Acc: 0.7434402332361516
